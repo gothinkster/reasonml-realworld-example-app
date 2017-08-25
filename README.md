@@ -1,23 +1,18 @@
-# ![RealWorld Example App](logo.png)
+# Basic Reason Template
 
-> ### ReasonML codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
+Hello! This project allows you to quickly get started with Reason and BuckleScript. If you wanted a more sophisticated version, try the `react` template (`bsb -theme react -init .`).
+
+# Build
+```
+npm run build
+```
+
+# Build + Watch
+
+```
+npm run watch
+```
 
 
-### [Demo](https://github.com/gothinkster/realworld)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/gothinkster/realworld)
-
-
-This codebase was created to demonstrate a fully fledged fullstack application built with **ReasonML** including CRUD operations, authentication, routing, pagination, and more.
-
-We've gone to great lengths to adhere to the **ReasonML** community styleguides & best practices.
-
-For more information on how to this works with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
-
-
-# How it works
-
-> Describe the general architecture of your app here
-
-# Getting started
-
-> npm install, npm start, etc.
-
+# Editor
+If you use `vscode`, Press `Windows + Shift + B` it will build automatically
