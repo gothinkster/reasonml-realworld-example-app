@@ -1,1 +1,5 @@
-Js.log "Hello, BuckleScript and Reason!";
+
+let doSomething args => {
+  print_endline args;
+  "expectedOutput";
+}
