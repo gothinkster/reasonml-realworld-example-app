@@ -14,5 +14,10 @@
   "devDependencies": {
     "bs-jest": "^0.1.0",
     "bs-platform": "1.8.2"
+  },
+  "dependencies": {
+    "bs-director": "^0.0.4",
+    "express": "^4.15.4",
+    "reason-react": "^0.2.4"
   }
 }
