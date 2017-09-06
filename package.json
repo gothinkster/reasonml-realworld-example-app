@@ -6,7 +6,8 @@
     "build": "bsb -make-world",
     "watch": "bsb -make-world -w",
     "test": "jest",
-    "webpack": "webpack"
+    "webpack": "webpack",
+    "webpack-dev": "webpack-dev-server"
   },
   "keywords": [
     "BuckleScript"
@@ -20,6 +21,7 @@
     "bs-director": "^0.0.4",
     "express": "^4.15.4",
     "reason-react": "^0.2.4",
-    "webpack": "^3.5.5"
+    "webpack": "^3.5.5",
+    "webpack-dev-server": "^2.7.1"
   }
 }
