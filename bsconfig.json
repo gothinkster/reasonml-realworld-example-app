@@ -12,5 +12,8 @@
       "bs-jest",
       "reason-react",
       "bs-director"
-  ]
+  ],
+  "reason": {
+    "react-jsx": 2
+  }
 }

@@ -5,7 +5,8 @@
     "clean": "bsb -clean-world",
     "build": "bsb -make-world",
     "watch": "bsb -make-world -w",
-    "test": "jest"
+    "test": "jest",
+    "webpack": "webpack"
   },
   "keywords": [
     "BuckleScript"
@@ -18,6 +19,7 @@
   "dependencies": {
     "bs-director": "^0.0.4",
     "express": "^4.15.4",
-    "reason-react": "^0.2.4"
+    "reason-react": "^0.2.4",
+    "webpack": "^3.5.5"
   }
 }
