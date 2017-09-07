@@ -1,4 +1,4 @@
 type routes = 
   | Home
   | Register
-  | Login;
+  /* | Login */;

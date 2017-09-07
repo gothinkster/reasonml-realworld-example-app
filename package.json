@@ -21,7 +21,7 @@
     "bs-director": "^0.0.4",
     "express": "^4.15.4",
     "reason-react": "^0.2.4",
-    "webpack": "^3.5.5",
+    "webpack": "^3.5.6",
     "webpack-dev-server": "^2.7.1"
   }
 }

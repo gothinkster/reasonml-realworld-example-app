@@ -1,13 +1,10 @@
-let renderForRoute route => {
-  ReactDOMRe.renderToElementWithId <Body route /> "main-body";  
-};
+let renderForRoute route => ReactDOMRe.renderToElementWithId <Body route={route} /> "root";
 
-let router = 
+let router =
   DirectorRe.makeRouter {
-    "/": renderForRoute Routes.Home,
-    "/register": renderForRoute Routes.Register,
-    "/login": renderForRoute Routes.Login
+    "/": fun () => renderForRoute Routes.Home,
+    "/home": fun () => renderForRoute Routes.Home,
+    "/register": fun () => renderForRoute Routes.Register
   };
 
-DirectorRe.configure router {"html5history": true};
 DirectorRe.init router "/";

@@ -1,8 +1,8 @@
 let component = ReasonReact.statelessComponent "Home";
 
-let make ::router _children => {
+let make _children => {
   ...component,
   render: fun _self => {
-    <div />
+    <div> (ReasonReact.stringToElement "this the home view") </div>
   }
 };

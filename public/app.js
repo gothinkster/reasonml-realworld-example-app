@@ -11578,17 +11578,19 @@ var ReasonReact                       = __webpack_require__(36);
 var Director$slashbuild$slashdirector = __webpack_require__(206);
 
 function renderForRoute(route) {
-  return ReactDOMRe.renderToElementWithId(ReasonReact.element(/* None */0, /* None */0, Body.make(route, /* array */[])), "main-body");
+  return ReactDOMRe.renderToElementWithId(ReasonReact.element(/* None */0, /* None */0, Body.make(route, /* array */[])), "root");
 }
 
 var router = new Director$slashbuild$slashdirector.Router({
-      "/": renderForRoute(/* Home */0),
-      "/register": renderForRoute(/* Register */1),
-      "/login": renderForRoute(/* Login */2)
-    });
-
-router.configure({
-      html5history: /* true */1
+      "/": (function () {
+          return renderForRoute(/* Home */0);
+        }),
+      "/home": (function () {
+          return renderForRoute(/* Home */0);
+        }),
+      "/register": (function () {
+          return renderForRoute(/* Register */1);
+        })
     });
 
 router.init("/");
@@ -11616,12 +11618,17 @@ function show(prim) {
   return prim;
 }
 
-function make(_, _$1) {
+function make(route, _) {
   var newrecord = component.slice();
   newrecord[/* render */9] = (function () {
-      return React.createElement("div", undefined, ReasonReact.element(/* None */0, /* None */0, Header.make(/* array */[])), React.createElement("div", {
-                      id: "mid-page"
-                    }));
+      var select_subpage = function (route) {
+        if (route !== 0) {
+          return "Register";
+        } else {
+          return "Home";
+        }
+      };
+      return React.createElement("div", undefined, ReasonReact.element(/* None */0, /* None */0, Header.make(/* array */[])), React.createElement("div", undefined, select_subpage(route)));
     });
   return newrecord;
 }
@@ -14130,12 +14137,11 @@ function make() {
                                   className: "nav-item"
                                 }, React.createElement("a", {
                                       className: "nav-link active",
-                                      href: ""
+                                      href: "#/"
                                     }, "Home")), React.createElement("li", {
                                   className: "nav-item"
                                 }, React.createElement("a", {
-                                      className: "nav-link",
-                                      href: ""
+                                      className: "nav-link"
                                     }, React.createElement("i", {
                                           className: "ion-compose"
                                         }), " New Post")), React.createElement("li", {
@@ -14149,7 +14155,7 @@ function make() {
                                   className: "nav-item"
                                 }, React.createElement("a", {
                                       className: "nav-link",
-                                      href: ""
+                                      href: "#/register"
                                     }, "Sign up"))))));
     });
   return newrecord;
