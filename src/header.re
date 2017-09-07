@@ -1,7 +1,7 @@
 let component = ReasonReact.statelessComponent "Header";
 let show = ReasonReact.stringToElement;
 
-let make _children => {
+let make ::router _children => { 
   ...component, /* spread the template's other defaults into here  */
   render: fun _self => {
     <div> 
@@ -13,7 +13,7 @@ let make _children => {
             <a className="nav-link active" href=""> (show "Home") </a>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="">
+            <a className="nav-link">
               <i className="ion-compose" /> (show " New Post") 
             </a>
           </li>
@@ -22,7 +22,7 @@ let make _children => {
                 <i className="ion-gear-a" /> (show " Settings") 
             </a>
           </li>
-          <li className="nav-item">
+          <li className="nav-item" href="#">
             <a className="nav-link" href=""> (show "Sign up") </a>
           </li>
         </ul>
