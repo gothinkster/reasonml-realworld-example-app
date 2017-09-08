@@ -11618,24 +11618,26 @@ function show(prim) {
   return prim;
 }
 
+function select_subpage(route) {
+  if (route !== 0) {
+    return "Register";
+  } else {
+    return "Home";
+  }
+}
+
 function make(route, _) {
   var newrecord = component.slice();
   newrecord[/* render */9] = (function () {
-      var select_subpage = function (route) {
-        if (route !== 0) {
-          return "Register";
-        } else {
-          return "Home";
-        }
-      };
       return React.createElement("div", undefined, ReasonReact.element(/* None */0, /* None */0, Header.make(/* array */[])), React.createElement("div", undefined, select_subpage(route)));
     });
   return newrecord;
 }
 
-exports.component = component;
-exports.show      = show;
-exports.make      = make;
+exports.component      = component;
+exports.show           = show;
+exports.select_subpage = select_subpage;
+exports.make           = make;
 /* component Not a pure module */
 
 
