@@ -13,12 +13,12 @@ let make _children => {
             <a className="nav-link active" href="#/"> (show "Home") </a>
           </li>
           <li className="nav-item">
-            <a className="nav-link">
+            <a className="nav-link" href="#/article/create">
               <i className="ion-compose" /> (show " New Post") 
             </a>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="">
+            <a className="nav-link" href="#/settings">
                 <i className="ion-gear-a" /> (show " Settings") 
             </a>
           </li>
