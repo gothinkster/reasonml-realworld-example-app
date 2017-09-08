@@ -7,14 +7,15 @@ let make ::route _children => {
   render: fun _self => {
     let select_subpage route => {
       switch route {
-        | Routes.Home => "Home"
-        | Routes.Register => "Register"
+        | Routes.Home => <Home />
+        | Routes.Register => <Register />
       };
     };
      
     <div>
       <Header /> 
-      <div> (show (select_subpage route)) </div>     
+      <div> (select_subpage route) </div> 
+      <Footer />    
     </div>
   }  
 };

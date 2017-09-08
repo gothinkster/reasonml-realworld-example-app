@@ -27,7 +27,7 @@ let make _children => {
           </li>
         </ul>
         </div>
-      </nav> 
+      </nav>
     </div>
   }
 };
