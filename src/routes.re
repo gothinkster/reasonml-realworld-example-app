@@ -1,4 +1,8 @@
 type routes = 
   | Home
   | Register
-  /* | Login */;
+  | Login
+  | Settings
+  | Article
+  | CreateArticle
+  | EditArticle;

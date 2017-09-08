@@ -1,8 +1,6 @@
 let component = ReasonReact.statelessComponent "Profile";
 let show = ReasonReact.stringToElement;
 
-
-
 let make _children => { 
   ...component,
   render: fun _self => {

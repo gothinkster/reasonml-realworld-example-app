@@ -9,6 +9,9 @@ let make ::route _children => {
       switch route {
         | Routes.Home => <Home />
         | Routes.Register => <Register />
+        | Routes.Login => <Login />
+        | Routes.Settings => <Settings /> 
+        | Routes.Article => <Article />
       };
     };
      
