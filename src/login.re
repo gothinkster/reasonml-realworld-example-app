@@ -1,6 +1,6 @@
 let component = ReasonReact.statelessComponent "Login";
 
-let make ::router _children => {
+let make _children => {
   ...component,
   render: fun _self => {
     <div />
