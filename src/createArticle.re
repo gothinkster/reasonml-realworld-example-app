@@ -1,4 +1,4 @@
-let component = ReasonReact.statelessComponent "Header";
+let component = ReasonReact.statelessComponent "CreateArticle";
 let show = ReasonReact.stringToElement;
 
 let make _children => {

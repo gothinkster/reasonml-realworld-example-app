@@ -12,6 +12,8 @@ let make ::route _children => {
         | Routes.Login => <Login />
         | Routes.Settings => <Settings /> 
         | Routes.Article => <Article />
+        | Routes.CreateArticle => <CreateArticle />
+        | Routes.EditArticle => <Article />
       };
     };
      
