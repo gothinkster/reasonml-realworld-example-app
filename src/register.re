@@ -13,6 +13,8 @@ let component = ReasonReact.reducerComponent "Register";
 let show = ReasonReact.stringToElement;
 let register _event => Register;
 
+let hideMessage = ReactDOMRe.Style.make display::"none" ();
+
 /* If we need to unit test, then we can pass in the reducer with the side effect function already passed in */
 let make _children => {
   ...component,
@@ -29,7 +31,7 @@ let make _children => {
           <div className="col-md-6 offset-md-3 col-xs-12">
             <h1 className="text-xs-center"> (show "Sign up") </h1>
             <p className="text-xs-center"> <a href=""> (show "Have an account?") </a> </p>
-            <ul className="error-messages"> <li> (show "That email is already taken") </li> </ul>
+            <ul className="error-messages" style=(hideMessage) > <li> (show "That email is already taken") </li> </ul>
             <form>
               <fieldset className="form-group">
                 <input
