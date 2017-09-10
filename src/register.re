@@ -66,17 +66,15 @@ module Encode = {
 
 let loginUser credentials => {   
   let data = Encode.user credentials; 
-  Js.log (Encode.user credentials);
   let request = make_init Post None (Some data);
   Js.log request;
   /* change this to be login instead of register */
   let _ = 
     Js.Promise.(
-      fetchWithInit "http://127.0.0.1:7782/users" request 
+      fetchWithInit (Config.apiUrlBase ^ "users") request 
       |> then_ Response.text 
       |> then_ (fun text => print_endline text |> resolve)
     );    
- 
   ()
 };
 

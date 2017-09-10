@@ -25,3 +25,4 @@ lib/bs
 .merlin
 node_modules/
 tasks.json
+lib/js/*
