@@ -35,8 +35,9 @@ let make_headers (token: option string) => {
 };
 
 let make_init method_ token (data: option Js.Json.t) => {
-  let default_init =
-    RequestInit.make mode::CORS ::method_ headers::(HeadersInit.makeWithArray @@ make_headers token);
+  let default_init =        
+    RequestInit.make mode::NoCORS ::method_ headers::(HeadersInit.makeWithArray @@ make_headers token);
+
   switch data {
   | None => default_init ()
   | Some d => default_init body::(BodyInit.make @@ Js.Json.stringify d) ()
@@ -49,18 +50,33 @@ let toJson listedElements => {
   |> Js.Json.object_;
 };
 
-let loginUser credentials => {
-  Js.log "Before parsing the jason";
-  
-  let data = Js.Json.parseExn {js|{"user": {"email":credentials.email, "password":credentials.password}}|js};
-  Js.log data;
+module Encode = {
+  let encodeUserCredentials creds => {
+    open! Json.Encode;
+    object_ [("email", string creds.email), ("password", string creds.password)]
+  };
+
+  let user r =>
+    Json.Encode.(
+      object_ [
+        ("user", encodeUserCredentials r )        
+      ]
+    );
+};
+
+let loginUser credentials => {   
+  let data = Encode.user credentials; 
+  Js.log (Encode.user credentials);
   let request = make_init Post None (Some data);
+  Js.log request;
+  /* change this to be login instead of register */
   let _ = 
     Js.Promise.(
-      fetchWithInit "127.0.0.1:7629/users/login" request /* (RequestInit.make method_::Post ())  */
+      fetchWithInit "http://127.0.0.1:7782/users" request 
       |> then_ Response.text 
       |> then_ (fun text => print_endline text |> resolve)
     );    
+ 
   ()
 };
 

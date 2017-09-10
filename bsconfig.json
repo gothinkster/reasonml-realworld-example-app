@@ -12,7 +12,8 @@
       "bs-jest",
       "reason-react",
       "bs-director",
-      "bs-fetch"
+      "bs-fetch",
+      "bs-json"
   ],
   "reason": {
     "react-jsx": 2
