@@ -4,7 +4,7 @@ open Jest;
 let () =
   describe "Medium validation"
     ExpectJs.(fun () => {
-      test "should demonstrate a test a reason" (fun () => 
+      test "should demonstrate a test a reason" (fun () => {
         expect(Demo.doSomething "withArgs") |> toEqual "expectedOutput"
-      );
+      });
     });

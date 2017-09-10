@@ -1,3 +1,5 @@
+open Bs_fetch;
+
 type action =
   | Login
   | Register
@@ -15,12 +17,52 @@ let component = ReasonReact.reducerComponent "Register";
 
 let show = ReasonReact.stringToElement;
 let register _event => Register;
+let login _event => Login;
 
 let hideMessage = ReactDOMRe.Style.make display::"none" ();
 
 let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
+
+/* TODO: Refactor this to be outside of the component */
+let make_headers (token: option string) => {
+  let content_type = ("content-type", "application/json");
+  switch token {
+  | None => [|content_type|]
+  | Some t => [|content_type, ("authorization", "Token " ^ t)|]
+  }
+};
+
+let make_init method_ token (data: option Js.Json.t) => {
+  let default_init =
+    RequestInit.make mode::CORS ::method_ headers::(HeadersInit.makeWithArray @@ make_headers token);
+  switch data {
+  | None => default_init ()
+  | Some d => default_init body::(BodyInit.make @@ Js.Json.stringify d) ()
+  }
+};
+
+let toJson listedElements => {
+  listedElements
+  |> Js.Dict.fromList 
+  |> Js.Json.object_;
+};
+
+let loginUser credentials => {
+  Js.log "Before parsing the jason";
+  
+  let data = Js.Json.parseExn {js|{"user": {"email":credentials.email, "password":credentials.password}}|js};
+  Js.log data;
+  let request = make_init Post None (Some data);
+  let _ = 
+    Js.Promise.(
+      fetchWithInit "127.0.0.1:7629/users/login" request /* (RequestInit.make method_::Post ())  */
+      |> then_ Response.text 
+      |> then_ (fun text => print_endline text |> resolve)
+    );    
+  ()
+};
 
 /* If we need to unit test, then we can pass in the reducer with the side effect function already passed in */
 let make _children => {
@@ -32,7 +74,7 @@ let make _children => {
     | EmailUpdate value => ReasonReact.Update {...state, email: value}
     | PasswordUpdate value => ReasonReact.Update {...state, password: value}
     | Login => ReasonReact.NoUpdate
-    | Register => ReasonReact.UpdateWithSideEffects {...state, email: "fake"} (fun _self => Js.log state)
+    | Register => ReasonReact.SideEffects (fun _self => loginUser state)
     },   
   render: fun {state, reduce} =>
     <div className="auth-page">
