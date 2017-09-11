@@ -64,17 +64,37 @@ module Encode = {
     );
 };
 
+type tesla = Js.t {
+  .
+  color: string
+};
+
 let loginUser credentials => {   
+  /* open Config;  */
+
   let data = Encode.user credentials; 
   let request = make_init Post None (Some data);
-  Js.log request;
-  /* change this to be login instead of register */
-  let _ = 
+  
+  /* change this to be login instead of register 
+  Js.Promise.(
+    Axios.get "/user?ID=12345"
+    |> then_ (fun resp => resolve (Js.log resp##data))
+    |> catch (fun err => resolve (Js.log err))
+  )  
+  */
+  /* let result =        
+    fetchWithInit (apiUrlBase ^ (mapUrl Authenticate)) request 
+    |> Js.Promise.then_ Response.text 
+    |> Js.Promise.then_ (fun text => Js.Promise.resolve text ); */
+  
+  let settings = { "user": {"email": credentials.email, "password": credentials.password}}; 
+  /* let result = 
     Js.Promise.(
-      fetchWithInit (Config.apiUrlBase ^ "users") request 
-      |> then_ Response.text 
-      |> then_ (fun text => print_endline text |> resolve)
-    );    
+        Axios.postData (apiUrlBase ^ (mapUrl Authenticate)) settings  
+        |> then_ (fun response => resolve (Js.log response))
+        |> then_ (fun err => resolve (Js.log err))
+      );
+  Js.log(result);  */
   ()
 };
 

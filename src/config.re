@@ -1,4 +1,5 @@
-let apiUrlBase = "http://127.0.0.1:7782";
+let apiUrlBase = "http://127.0.0.1:7888";
+
 type urlMap = 
   | Authenticate
   | Register

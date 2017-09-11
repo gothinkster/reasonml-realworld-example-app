@@ -18,6 +18,7 @@
     "bs-platform": "1.8.2"
   },
   "dependencies": {
+    "bs-axios": "^0.0.16",
     "bs-director": "^0.0.4",
     "bs-fetch": "^0.1.1",
     "bs-json": "^0.2.1",

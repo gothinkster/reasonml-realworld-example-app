@@ -13,7 +13,8 @@
       "reason-react",
       "bs-director",
       "bs-fetch",
-      "bs-json"
+      "bs-json",
+      "bs-axios"
   ],
   "reason": {
     "react-jsx": 2
