@@ -1,4 +1,4 @@
-let apiUrlBase = "http://127.0.0.1:7888";
+let apiUrlBase = "http://localhost:7300";
 
 type urlMap = 
   | Authenticate

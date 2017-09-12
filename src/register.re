@@ -70,7 +70,7 @@ type tesla = Js.t {
 };
 
 let loginUser credentials => {   
-  /* open Config;  */
+  open Config;   
 
   let data = Encode.user credentials; 
   let request = make_init Post None (Some data);
@@ -87,14 +87,24 @@ let loginUser credentials => {
     |> Js.Promise.then_ Response.text 
     |> Js.Promise.then_ (fun text => Js.Promise.resolve text ); */
   
-  let settings = { "user": {"email": credentials.email, "password": credentials.password}}; 
-  /* let result = 
+  /* let settings = { "user": {"email": credentials.email, "password": credentials.password } }; 
+  
+  
+  let result = 
     Js.Promise.(
-        Axios.postData (apiUrlBase ^ (mapUrl Authenticate)) settings  
-        |> then_ (fun response => resolve (Js.log response))
+        Axios.get "https://conduit.productionready.io/api/tags"
+        |> then_ (fun response => resolve response)
         |> then_ (fun err => resolve (Js.log err))
-      );
-  Js.log(result);  */
+        |> catch (fun err => resolve (Js.log err))
+      ); */
+  let result =  
+    Js.Promise.(
+      fetch (apiUrlBase ^ (mapUrl Tags))
+      |> then_ Response.text
+      |> then_ (fun text => print_endline text |> resolve)
+    );
+  Js.log(result);  
+  Js.log(apiUrlBase ^ (mapUrl Tags));
   ()
 };
 
