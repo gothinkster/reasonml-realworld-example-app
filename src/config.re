@@ -1,4 +1,4 @@
-let apiUrlBase = "http://localhost:7300";
+let apiUrlBase = "https://conduit.productionready.io/api";
 
 type urlMap = 
   | Authenticate
