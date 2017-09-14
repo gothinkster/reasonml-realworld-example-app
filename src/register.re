@@ -77,8 +77,7 @@ let loginUser credentials => {
   
   open Js.Promise;  
   fetchWithInit (apiUrlBase ^ (mapUrl Config.Authenticate)) request
-  |> then_ (fun response => registrationResult (Response.status response) (Response.json response) |> resolve) |> ignore; 
-  /* |> then_ (fun final => registrationResult final |> resolve) |> ignore; */
+  |> then_ (fun response => registrationResult (Response.status response) (Response.json response) |> resolve) |> ignore;   
   
   ()
 };
