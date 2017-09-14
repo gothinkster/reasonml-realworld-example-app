@@ -29,9 +29,35 @@ fetch('https://conduit.productionready.io/api/tags', {
   }  
 }).then(function(data){
   return data.json()
-}).then(function (result){
+})
+.then(function (result){
   console.log(result)
 })
-.catch(function(error) {
-  console.log('request failed', error)
-});
+// .catch(function(error) {
+//   console.log('request failed', error)
+// });
+
+let request = { 
+  method: "POST", 
+  headers: {"content-type": "application/json"}, 
+  body: JSON.stringify({user: {email:"",password:""}}),     
+}
+// fetch("https://conduit.productionready.io/api/users", request)
+//   .then(function(response){
+//     return response.text()
+//   })
+//   .then(function(body){
+//     console.log(body)
+//   });
+
+  
+  console.log(request);
+  var result = fetch("https://conduit.productionready.io/api/users", request)
+    .then((function (prim) {
+          return prim.text();
+        }))
+    .then(function(final){
+      console.log("==================================================================")
+      return Promise.resolve(console.log(final));
+    })
+  console.log(result);

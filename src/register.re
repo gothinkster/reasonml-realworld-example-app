@@ -36,13 +36,12 @@ let make_headers (token: option string) => {
 
 let make_init method_ token (data: option Js.Json.t) => {
   let default_init =        
-    RequestInit.make mode::NoCORS ::method_ headers::(HeadersInit.makeWithArray @@ make_headers token);
+    RequestInit.make ::method_ headers::(HeadersInit.makeWithArray @@ make_headers token);
 
   switch data {
   | None => default_init ()
   | Some d => default_init body::(BodyInit.make @@ Js.Json.stringify d) ()
-  }
-};
+  }};
 
 let toJson listedElements => {
   listedElements
@@ -64,41 +63,23 @@ module Encode = {
     );
 };
 
-/* let rename articleId newTitle => {
-  let headers = Bs_fetch.HeadersInit.make {"Content-Type": "application/json"};
-  let bodyJsObject = {"title": newTitle};
-  let body = bodyJsObject |> Js.Json.stringifyAny |> Option.get |> BodyInit.make;
-  Bs_fetch.fetchWithInit
-    ("test" ^ "/" ^ articleId) (RequestInit.make method_::Patch ::headers ::body ()) |>
-  Js.Promise.then_ Bs_fetch.Response.text
-}; */
+let registrationResult status json => {       
+  Js.log status;  
+  json |> Js.Promise.then_ (fun reply => Js.log reply |> Js.Promise.resolve) |> ignore;
+  ()
+};
 
 let loginUser credentials => {   
-  open Config;   
+  open Config;    
 
   let data = Encode.user credentials; 
-  let request = make_init Post None (Some data);
+  let request = make_init Post None (Some data);     
   
-  /* change this to be login instead of register 
-  Js.Promise.(
-    Axios.get "/user?ID=12345"
-    |> then_ (fun resp => resolve (Js.log resp##data))
-    |> catch (fun err => resolve (Js.log err))
-  )  
-  */
-  /* let result =        
-    fetchWithInit (apiUrlBase ^ (mapUrl Authenticate)) request 
-    |> Js.Promise.then_ Response.text 
-    |> Js.Promise.then_ (fun text => Js.Promise.resolve text ); */
-  print_endline ("Email: " ^ credentials.email);
-  print_endline ("Password: " ^ credentials.password);
-
-  let settings = { "user": {"email": credentials.email, "password": credentials.password}}; 
-  let result =   
-    fetchWithInit (apiUrlBase ^ (mapUrl Config.Register)) request
-    |> Js.Promise.then_ Bs_fetch.Response.text;
-    
-  Js.log(result); 
+  open Js.Promise;  
+  fetchWithInit (apiUrlBase ^ (mapUrl Config.Authenticate)) request
+  |> then_ (fun response => registrationResult (Response.status response) (Response.json response) |> resolve) |> ignore; 
+  /* |> then_ (fun final => registrationResult final |> resolve) |> ignore; */
+  
   ()
 };
 
