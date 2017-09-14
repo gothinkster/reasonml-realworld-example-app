@@ -1,4 +1,4 @@
-open Bs_fetch;
+open JsonRequests;
 
 type action =
   | Login
@@ -10,43 +10,9 @@ type action =
 type state = {
   name: string,
   email: string,
-  password: string
-};
-
-let component = ReasonReact.reducerComponent "Register";
-
-let show = ReasonReact.stringToElement;
-let register _event => Register;
-let login _event => Login;
-
-let hideMessage = ReactDOMRe.Style.make display::"none" ();
-
-let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
-let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
-let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
-
-/* TODO: Refactor this to be outside of the component */
-let make_headers (token: option string) => {
-  let content_type = ("content-type", "application/json");
-  switch token {
-  | None => [|content_type|]
-  | Some t => [|content_type, ("authorization", "Token " ^ t)|]
-  }
-};
-
-let make_init method_ token (data: option Js.Json.t) => {
-  let default_init =        
-    RequestInit.make ::method_ headers::(HeadersInit.makeWithArray @@ make_headers token);
-
-  switch data {
-  | None => default_init ()
-  | Some d => default_init body::(BodyInit.make @@ Js.Json.stringify d) ()
-  }};
-
-let toJson listedElements => {
-  listedElements
-  |> Js.Dict.fromList 
-  |> Js.Json.object_;
+  password: string,
+  hasValidationError: bool,
+  validationError: string
 };
 
 module Encode = {
@@ -61,7 +27,20 @@ module Encode = {
         ("user", encodeUserCredentials r )        
       ]
     );
-};
+}; 
+
+let component = ReasonReact.reducerComponent "Register";
+
+let show = ReasonReact.stringToElement;
+let register _event => Register;
+let login _event => Login;
+
+let hideValidation = ReactDOMRe.Style.make display::"none" ();
+let showValidation = ReactDOMRe.Style.make display::"block" ();
+
+let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
+let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
+let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
 let registrationResult status json => {       
   Js.log status;  
@@ -70,22 +49,15 @@ let registrationResult status json => {
 };
 
 let loginUser credentials => {   
-  open Config;    
-
   let data = Encode.user credentials; 
-  let request = make_init Post None (Some data);     
-  
-  open Js.Promise;  
-  fetchWithInit (apiUrlBase ^ (mapUrl Config.Authenticate)) request
-  |> then_ (fun response => registrationResult (Response.status response) (Response.json response) |> resolve) |> ignore;   
-  
+  registerNewUser registrationResult data;
   ()
 };
 
 /* If we need to unit test, then we can pass in the reducer with the side effect function already passed in */
 let make _children => {
   ...component,
-  initialState: fun () => {name: "", email: "", password: ""},
+  initialState: fun () => {name: "", email: "", password: "", hasValidationError: false, validationError: ""},
   reducer: fun action state =>
     switch action {
     | NameUpdate value => ReasonReact.Update {...state, name: value} 
@@ -101,7 +73,7 @@ let make _children => {
           <div className="col-md-6 offset-md-3 col-xs-12">
             <h1 className="text-xs-center"> (show "Sign up") </h1>
             <p className="text-xs-center"> <a href=""> (show "Have an account?") </a> </p>
-            <ul className="error-messages" style=(hideMessage) > <li> (show "That email is already taken") </li> </ul>
+            <ul className="error-messages" style=(state.hasValidationError ? showValidation: hideValidation) > <li> (show state.validationError) </li> </ul>
             <form>
               <fieldset className="form-group">
                 <input
