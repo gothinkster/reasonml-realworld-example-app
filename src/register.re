@@ -64,25 +64,41 @@ module Encode = {
     );
 };
 
-type tesla = Js.t {
-  .
-  color: string
-};
+/* let rename articleId newTitle => {
+  let headers = Bs_fetch.HeadersInit.make {"Content-Type": "application/json"};
+  let bodyJsObject = {"title": newTitle};
+  let body = bodyJsObject |> Js.Json.stringifyAny |> Option.get |> BodyInit.make;
+  Bs_fetch.fetchWithInit
+    ("test" ^ "/" ^ articleId) (RequestInit.make method_::Patch ::headers ::body ()) |>
+  Js.Promise.then_ Bs_fetch.Response.text
+}; */
 
 let loginUser credentials => {   
   open Config;   
 
   let data = Encode.user credentials; 
-  let request = make_init Post None (Some data);  
+  let request = make_init Post None (Some data);
   
-  /* TODO: Changed the endpoint to the login endpoint */
-  let result =  
-    Js.Promise.(
-      fetch (apiUrlBase ^ (mapUrl Tags))
-      |> then_ Response.text
-      |> then_ (fun text => print_endline text |> resolve)
-    );
-  Js.log(result);    
+  /* change this to be login instead of register 
+  Js.Promise.(
+    Axios.get "/user?ID=12345"
+    |> then_ (fun resp => resolve (Js.log resp##data))
+    |> catch (fun err => resolve (Js.log err))
+  )  
+  */
+  /* let result =        
+    fetchWithInit (apiUrlBase ^ (mapUrl Authenticate)) request 
+    |> Js.Promise.then_ Response.text 
+    |> Js.Promise.then_ (fun text => Js.Promise.resolve text ); */
+  print_endline ("Email: " ^ credentials.email);
+  print_endline ("Password: " ^ credentials.password);
+
+  let settings = { "user": {"email": credentials.email, "password": credentials.password}}; 
+  let result =   
+    fetchWithInit (apiUrlBase ^ (mapUrl Config.Register)) request
+    |> Js.Promise.then_ Bs_fetch.Response.text;
+    
+  Js.log(result); 
   ()
 };
 
