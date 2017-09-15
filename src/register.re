@@ -12,7 +12,8 @@ type state = {
   email: string,
   password: string,
   hasValidationError: bool,
-  validationError: string
+  validationError: string,
+  registrationSucceeded: bool
 };
 
 module Encode = {
@@ -42,29 +43,44 @@ let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.For
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
+
+
 let registrationResult status json => {       
-  Js.log status;  
-  json |> Js.Promise.then_ (fun reply => Js.log reply |> Js.Promise.resolve) |> ignore;
-  ()
+  /* TODO: Make call to save token */  
+  /*
+  {
+  "errors":{
+      "body": [
+        "can't be empty"
+      ]
+    }
+  }
+  */
+
+  
+  let saveToLocalStorage reply => {
+    
+    Js.log reply;
+    () |> Js.Promise.resolve;
+  };
+
+  json |> Js.Promise.then_ saveToLocalStorage |> ignore;
 };
 
-let loginUser credentials => {   
-  let data = Encode.user credentials; 
-  registerNewUser registrationResult data;
-  ()
-};
+let registerNewUser credentials _route => Encode.user credentials |> JsonRequests.registerNewUser registrationResult;
 
 /* If we need to unit test, then we can pass in the reducer with the side effect function already passed in */
-let make _children => {
+/* TODO: use the route to go the next home screen when registered successfully */
+let make ::route _children => {
   ...component,
-  initialState: fun () => {name: "", email: "", password: "", hasValidationError: false, validationError: ""},
+  initialState: fun () => {name: "", email: "", password: "", hasValidationError: false, validationError: "", registrationSucceeded:false},
   reducer: fun action state =>
     switch action {
     | NameUpdate value => ReasonReact.Update {...state, name: value} 
     | EmailUpdate value => ReasonReact.Update {...state, email: value}
     | PasswordUpdate value => ReasonReact.Update {...state, password: value}
     | Login => ReasonReact.NoUpdate
-    | Register => ReasonReact.SideEffects (fun _self => loginUser state)
+    | Register => ReasonReact.SideEffects (fun _self => registerNewUser state route)
     },   
   render: fun {state, reduce} =>
     <div className="auth-page">

@@ -8,7 +8,7 @@ let make ::route _children => {
     let select_subpage route => {
       switch route {
         | Routes.Home => <Home />
-        | Routes.Register => <Register />
+        | Routes.Register => <Register route />
         | Routes.Login => <Login />
         | Routes.Settings => <Settings /> 
         | Routes.Article => <Article />
