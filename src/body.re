@@ -2,7 +2,7 @@ let component = ReasonReact.statelessComponent "Body";
 let show = ReasonReact.stringToElement;
 
 /* Just like any other variant data can be carried around with variants with the routes */
-let make ::route _children => { 
+let make ::route ::router _children => { 
   ...component,
   render: fun _self => {
     let select_subpage route => {
@@ -18,7 +18,7 @@ let make ::route _children => {
     };
      
     <div>
-      <Header /> 
+      <Header router /> 
       <div> (select_subpage route) </div> 
       <Footer />    
     </div>
