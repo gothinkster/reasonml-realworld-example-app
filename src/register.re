@@ -58,8 +58,8 @@ let registrationResult status json => {
   */
 
   
-  let saveToLocalStorage reply => {
-    
+  
+  let saveToLocalStorage reply => {    
     Js.log reply;
     () |> Js.Promise.resolve;
   };
@@ -69,19 +69,27 @@ let registrationResult status json => {
 
 let registerNewUser credentials _route => Encode.user credentials |> JsonRequests.registerNewUser registrationResult;
 
+let maskOff currentState => {
+  /* this is what will get returned to the reducer in the register */
+  {...currentState, registrationSucceeded: false, validationError: "Username taken"}
+};
+
+let reducer router action state => 
+  switch action {
+    | NameUpdate value => ReasonReact.Update {...state, name: value} 
+    | EmailUpdate value => ReasonReact.Update {...state, email: value}
+    | PasswordUpdate value => ReasonReact.Update {...state, password: value}
+    | Login => ReasonReact.NoUpdate
+    /* | Register => ReasonReact.SideEffects (fun _self => registerNewUser state route) */
+    | Register => ReasonReact.Update {maskOff state}
+  };
+
 /* If we need to unit test, then we can pass in the reducer with the side effect function already passed in */
 /* TODO: use the route to go the next home screen when registered successfully */
 let make ::route _children => {
   ...component,
   initialState: fun () => {name: "", email: "", password: "", hasValidationError: false, validationError: "", registrationSucceeded:false},
-  reducer: fun action state =>
-    switch action {
-    | NameUpdate value => ReasonReact.Update {...state, name: value} 
-    | EmailUpdate value => ReasonReact.Update {...state, email: value}
-    | PasswordUpdate value => ReasonReact.Update {...state, password: value}
-    | Login => ReasonReact.NoUpdate
-    | Register => ReasonReact.SideEffects (fun _self => registerNewUser state route)
-    },   
+  reducer: reducer (route),       
   render: fun {state, reduce} =>
     <div className="auth-page">
       <div className="container page">
