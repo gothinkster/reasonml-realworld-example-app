@@ -29,7 +29,7 @@ let registerNewUser  registerFunc jsonData => {
 
   let request = make_init Post None (Some jsonData); 
   fetchWithInit (apiUrlBase ^ (mapUrl Config.Authenticate)) request
-  |> then_ (fun response => registerFunc (Response.status response) (Response.json response) |> resolve) |> ignore; 
+  |> then_ (fun response => registerFunc (Response.status response) (Response.json response) |> resolve); 
 };
 
 
