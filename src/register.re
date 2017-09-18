@@ -1,25 +1,25 @@
 open JsonRequests;
 
-type action =
+type action 'a =
   | Login
   | Register
+  | RegisterReponse 'a
   | NameUpdate string
   | EmailUpdate string
   | PasswordUpdate string;
 
 type state = {
-  name: string,
+  username: string,
   email: string,
   password: string,
   hasValidationError: bool,
-  validationError: string,
-  registrationSucceeded: bool
+  validationError: string  
 };
 
 module Encode = {
   let encodeUserCredentials creds => {
     open! Json.Encode;
-    object_ [("email", string creds.email), ("password", string creds.password)]
+    object_ [("email", string creds.email), ("password", string creds.password), ("username", string creds.username)]
   };
 
   let user r =>
@@ -46,7 +46,7 @@ let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.For
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
-let registrationResult status json => {       
+let registrationResult reduce status json => {       
   /* TODO: Make call to save token */  
   /*
   {
@@ -58,16 +58,20 @@ let registrationResult status json => {
   }
   */
     
-  let saveToLocalStorage reply => {    
-    Js.log reply;
+  let saveToLocalStorage reply => {        
+    Js.log reply;     
     () |> Js.Promise.resolve;
   };
 
-  json |> Js.Promise.then_ saveToLocalStorage |> ignore;
+  json |> Js.Promise.then_ (fun response => {
+    reduce (fun () => RegisterReponse response);
+    saveToLocalStorage response |> Js.Promise.resolve;
+    /* reduce (fun () => RegisterReponse response) |> Js.Promise.resolve; */
+  })  |> ignore;
 };
 
-let registerNewUser credentials _route => { 
-  Encode.user credentials |> JsonRequests.registerNewUser registrationResult;
+let registerNewUser {ReasonReact.state: state, reduce} _route => {     
+  Encode.user state |> JsonRequests.registerNewUser (registrationResult reduce) |> ignore;
 };
 
 let maskOff currentState => {
@@ -75,37 +79,26 @@ let maskOff currentState => {
   {...currentState, hasValidationError: true, validationError: "Username taken"}
 };
 
-/* let reducer router action state => 
-  switch action {
-    | NameUpdate value => ReasonReact.Update {...state, name: value} 
-    | EmailUpdate value => ReasonReact.Update {...state, email: value}
-    | PasswordUpdate value => ReasonReact.Update {...state, password: value}
-    | Login => ReasonReact.NoUpdate
-    /* | Register => ReasonReact.SideEffects (fun _self => registerNewUser state route) */
-    | Register => ReasonReact.Update {maskOff state}
-  }; */
+let registerNewUserPrototype {ReasonReact.state: state, reduce} => {  
+  reduce (fun _ => RegisterReponse {...state, hasValidationError: true}) {...state, hasValidationError: true, validationError: "this worked"};
+  ()
+};
 
-/* If we need to unit test, then we can pass in the reducer with the side effect function already passed in */
+/* If we need to unit test, then we can pass in the reducer with the side effect 
+   function already passed in */
+
 /* TODO: use the route to go the next home screen when registered successfully */
 let make ::route _children => {
-  ...component,
-  didMount: fun self => {
-    Js.log "=========>---------------";
-    Js.log self;
-    ReasonReact.NoUpdate;
-  },
-  initialState: fun () => {name: "", email: "", password: "", hasValidationError: false, validationError: "", registrationSucceeded:false},
+  ...component,  
+  initialState: fun () => {username: "", email: "", password: "", hasValidationError: false, validationError: ""},
   reducer: fun action state => {
     switch action {
-      | NameUpdate value => ReasonReact.Update {...state, name: value} 
+      | NameUpdate value => ReasonReact.Update {...state, username: value} 
       | EmailUpdate value => ReasonReact.Update {...state, email: value}
       | PasswordUpdate value => ReasonReact.Update {...state, password: value}
       | Login => ReasonReact.NoUpdate
-      /* | Register => ReasonReact.SideEffects (fun _self => registerNewUser state route) */
-      | Register => { 
-        
-        ReasonReact.Update {maskOff state} 
-      }
+      | RegisterReponse response => ReasonReact.Update {...state, hasValidationError: true}
+      | Register => ReasonReact.SideEffects (fun self => registerNewUserPrototype self)       
   }},       
   render: fun {state, reduce} =>
     <div className="auth-page">
@@ -121,7 +114,7 @@ let make ::route _children => {
                   _type="text"
                   className="form-control form-control-lg"
                   placeholder="Your Name"
-                  value=state.name
+                  value=state.username
                   onChange=(reduce updateName)
                 />
               </fieldset>

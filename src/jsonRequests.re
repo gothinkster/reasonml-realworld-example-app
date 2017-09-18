@@ -28,8 +28,6 @@ let registerNewUser  registerFunc jsonData => {
   open Js.Promise;  
 
   let request = make_init Post None (Some jsonData); 
-  fetchWithInit (apiUrlBase ^ (mapUrl Config.Authenticate)) request
+  fetchWithInit (apiUrlBase ^ (mapUrl Config.Register)) request
   |> then_ (fun response => registerFunc (Response.status response) (Response.json response) |> resolve); 
 };
-
-
