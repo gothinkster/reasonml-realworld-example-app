@@ -79,10 +79,14 @@ let maskOff currentState => {
   {...currentState, hasValidationError: true, validationError: "Username taken"}
 };
 
-let registerNewUserPrototype {ReasonReact.state: state, reduce} => {  
-  reduce (fun _ => RegisterReponse {...state, hasValidationError: true}) {...state, hasValidationError: true, validationError: "this worked"};
+let registerNewUserPrototype {ReasonReact.state: state, reduce} => { 
+  
+  Js.log "getting callde";
+  let test = reduce (fun _ => RegisterReponse {...state, hasValidationError: true});
+  test {...state, hasValidationError: true};
   ()
 };
+
 
 /* If we need to unit test, then we can pass in the reducer with the side effect 
    function already passed in */
@@ -97,7 +101,7 @@ let make ::route _children => {
       | EmailUpdate value => ReasonReact.Update {...state, email: value}
       | PasswordUpdate value => ReasonReact.Update {...state, password: value}
       | Login => ReasonReact.NoUpdate
-      | RegisterReponse response => ReasonReact.Update {...state, hasValidationError: true}
+      | RegisterReponse _response =>  ReasonReact.Update {...state, hasValidationError: true}
       | Register => ReasonReact.SideEffects (fun self => registerNewUserPrototype self)       
   }},       
   render: fun {state, reduce} =>
@@ -107,7 +111,11 @@ let make ::route _children => {
           <div className="col-md-6 offset-md-3 col-xs-12">
             <h1 className="text-xs-center"> (show "Sign up") </h1>
             <p className="text-xs-center"> <a href=""> (show "Have an account?") </a> </p>
-            <ul className="error-messages" style=(state.hasValidationError ? showValidation: hideValidation) > <li> (show state.validationError) </li> </ul>
+            ( if state.hasValidationError {
+              <ul className="error-messages" > <li> (show state.validationError) </li> </ul> 
+            } else {
+              ReasonReact.nullElement
+            })            
             <form>
               <fieldset className="form-group">
                 <input
