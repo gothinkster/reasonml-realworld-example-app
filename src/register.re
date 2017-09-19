@@ -1,9 +1,9 @@
 open JsonRequests;
 
-type action 'a =
+type action =
   | Login
   | Register
-  | RegisterReponse 'a
+  | RegisterReponse string
   | NameUpdate string
   | EmailUpdate string
   | PasswordUpdate string;
@@ -70,38 +70,38 @@ let registrationResult reduce status json => {
   })  |> ignore;
 };
 
-let registerNewUser {ReasonReact.state: state, reduce} _route => {     
+/* let registerNewUser {ReasonReact.state: state, reduce} _route => {     
   Encode.user state |> JsonRequests.registerNewUser (registrationResult reduce) |> ignore;
-};
+}; */
 
 let maskOff currentState => {
   /* this is what will get returned to the reducer in the register */
   {...currentState, hasValidationError: true, validationError: "Username taken"}
 };
 
-let registerNewUserPrototype {ReasonReact.state: state, reduce} => { 
-  
-  Js.log "getting callde";
-  let test = reduce (fun _ => RegisterReponse {...state, hasValidationError: true});
-  test {...state, hasValidationError: true};
-  ()
-};
-
-
 /* If we need to unit test, then we can pass in the reducer with the side effect 
    function already passed in */
 
 /* TODO: use the route to go the next home screen when registered successfully */
 let make ::route _children => {
+  let registerNewUserPrototype {ReasonReact.state: state, reduce} => {   
+    reduce (fun _ => RegisterReponse "test");
+    () /* {...state, hasValidationError: true, validationError: "this is a test message" }*/    
+  };
+
+  {
   ...component,  
-  initialState: fun () => {username: "", email: "", password: "", hasValidationError: false, validationError: ""},
+  initialState: fun () => {username: "", email: "", password: "", hasValidationError: false, validationError: "Drifting"},
   reducer: fun action state => {
     switch action {
       | NameUpdate value => ReasonReact.Update {...state, username: value} 
       | EmailUpdate value => ReasonReact.Update {...state, email: value}
       | PasswordUpdate value => ReasonReact.Update {...state, password: value}
       | Login => ReasonReact.NoUpdate
-      | RegisterReponse _response =>  ReasonReact.Update {...state, hasValidationError: true}
+      | RegisterReponse response => { 
+        Js.log ("Repsonse: " ^ response);
+        ReasonReact.Update {...state, hasValidationError: true}
+      }
       | Register => ReasonReact.SideEffects (fun self => registerNewUserPrototype self)       
   }},       
   render: fun {state, reduce} =>
@@ -111,6 +111,7 @@ let make ::route _children => {
           <div className="col-md-6 offset-md-3 col-xs-12">
             <h1 className="text-xs-center"> (show "Sign up") </h1>
             <p className="text-xs-center"> <a href=""> (show "Have an account?") </a> </p>
+            (show state.validationError)
             ( if state.hasValidationError {
               <ul className="error-messages" > <li> (show state.validationError) </li> </ul> 
             } else {
@@ -149,5 +150,5 @@ let make ::route _children => {
           </div>
         </div>
       </div>
-    </div>
+    </div>}
 };
