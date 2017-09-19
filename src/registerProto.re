@@ -1,10 +1,11 @@
 type action =
   | Hulk
-  | Thor string;
+  | Thor string
+  | Pending string;
 
 type state = {
-  hasValidationError: bool,
-  validationError: string
+  hasError: bool,
+  errorMessage: string
 };
 
 let component = ReasonReact.reducerComponent "RegisterProto";
@@ -12,32 +13,45 @@ let component = ReasonReact.reducerComponent "RegisterProto";
 let trigger {ReasonReact.state: state, reduce} => 
   reduce (fun _event => Thor "test") state;
 
-let sideEffect event => {
-  Js.log "I can do a side effecet here before calling the reducer.";
-  Js.log event;
+let getRequest () => {
+  open Register;
 
-  Thor "new value"
+  {username: "", password: "", email: "", hasValidationError:false, validationError: ""}
+  |> Encode.user
+};
+
+let sideEffect {ReasonReact.state: _state, reduce} event => {
+  ReactEventRe.Mouse.preventDefault event;
+
+  let updateState _status jsonPayload => {
+    jsonPayload |> Js.Promise.then_ (fun _json => reduce (fun payload => Thor payload) ("this come back from promise") |> Js.Promise.resolve)
+  };
+  JsonRequests.registerNewUser (updateState) (getRequest ()) |> ignore;
+
+  Pending "Waiting for thor"
 };
 
 let make _children => {
   ...component,
-  initialState: fun () => {hasValidationError: false, validationError: "Do I look to be in a gaming mood?"},  
+  initialState: fun () => {hasError: false, errorMessage: "Do I look to be in a gaming mood?"},  
   reducer: fun action _state => {
-    switch action {
-      | Thor attack => {
-        Js.log ("Attack: " ^ attack);
-        ReasonReact.Update {hasValidationError: true, validationError: attack}
-      }
+    switch action { 
+      | Thor attack => ReasonReact.Update {hasError: true, errorMessage: attack}
       | Hulk => ReasonReact.SideEffects (fun self => trigger self)
+      | Pending message => ReasonReact.Update {hasError: true, errorMessage: message}
     };
   },
-  render: fun {state, reduce} => 
+  render: fun self => {
+    let {ReasonReact.state: state, reduce} = self; 
+    {
     <div>      
-      <div> (ReasonReact.stringToElement state.validationError) </div>
+      <div> (ReasonReact.stringToElement state.errorMessage) </div>
       <button 
-        onClick=(reduce sideEffect) 
+        onClick=(reduce (sideEffect self)) 
         className="btn btn-lg btn-primary pull-xs-right"> 
         (ReasonReact.stringToElement "Sign up") 
       </button>            
     </div>
+    }
+  }  
 };
