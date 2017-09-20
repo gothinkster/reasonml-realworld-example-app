@@ -2,8 +2,7 @@ open JsonRequests;
 
 type action =
   | Login
-  | Register
-  | RegisterReponse string
+  | Register (bool, string)
   | NameUpdate string
   | EmailUpdate string
   | PasswordUpdate string;
@@ -35,7 +34,7 @@ let component = ReasonReact.reducerComponent "Register";
 let show = ReasonReact.stringToElement;
 let register event => {
   ReactEventRe.Mouse.preventDefault event;
-  Register;
+  Register (false, "");
 };
 let login _event => Login;
 
@@ -46,21 +45,8 @@ let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.For
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
-let registrationResult reduce status json => {         
-  let saveToLocalStorage reply => {        
-    Js.log reply;     
-    () |> Js.Promise.resolve;
-  };
-
-  json |> Js.Promise.then_ (fun response => {
-    reduce (fun () => RegisterReponse response);
-    saveToLocalStorage response |> Js.Promise.resolve;
-    /* reduce (fun () => RegisterReponse response) |> Js.Promise.resolve; */
-  })  |> ignore;
-};
-
 let registerNewUser {ReasonReact.state: state, reduce} _route => {     
-  Encode.user state |> JsonRequests.registerNewUser (registrationResult reduce) |> ignore;
+  /* Encode.user state |> JsonRequests.registerNewUser (registrationResult reduce) |> ignore; */
 }; 
 
 /* If we need to unit test, then we can pass in the reducer with the side effect 
@@ -77,11 +63,7 @@ let make ::route _children => {
       | EmailUpdate value => ReasonReact.Update {...state, email: value}
       | PasswordUpdate value => ReasonReact.Update {...state, password: value}
       | Login => ReasonReact.NoUpdate
-      | RegisterReponse response => { 
-        Js.log ("Repsonse: " ^ response);
-        ReasonReact.Update {...state, hasValidationError: true}
-      }
-      | Register => ReasonReact.SideEffects (fun self => registerNewUserPrototype self)       
+      | Register (hasError, message) => ReasonReact.Update {...state, hasValidationError: hasError, validationError: message }  
   }},       
   render: fun {state, reduce} =>
     <div className="auth-page">
