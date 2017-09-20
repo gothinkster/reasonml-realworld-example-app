@@ -32,28 +32,23 @@ module Encode = {
 let component = ReasonReact.reducerComponent "Register";
 
 let show = ReasonReact.stringToElement;
-let register event => {
-  ReactEventRe.Mouse.preventDefault event;
-  Register (false, "");
-};
-let login _event => Login;
 
-let hideValidation = ReactDOMRe.Style.make display::"none" ();
-let showValidation = ReactDOMRe.Style.make display::"block" ();
+let register {ReasonReact.state: _state, reduce} event => {
+  ReactEventRe.Mouse.preventDefault event;  
+  Register (false, "I got the herb.");
+};
+
+let login _event => Login;
 
 let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
-let registerNewUser {ReasonReact.state: state, reduce} _route => {     
-  /* Encode.user state |> JsonRequests.registerNewUser (registrationResult reduce) |> ignore; */
-}; 
-
 /* If we need to unit test, then we can pass in the reducer with the side effect 
    function already passed in */
 
 /* TODO: use the route to go the next home screen when registered successfully */
-let make ::route _children => {
+let make ::router _children => {
   {
   ...component,  
   initialState: fun () => {username: "", email: "", password: "", hasValidationError: false, validationError: "Drifting"},
@@ -65,7 +60,9 @@ let make ::route _children => {
       | Login => ReasonReact.NoUpdate
       | Register (hasError, message) => ReasonReact.Update {...state, hasValidationError: hasError, validationError: message }  
   }},       
-  render: fun {state, reduce} =>
+  render: fun self => {
+    let {ReasonReact.state: state, reduce} = self;
+    {
     <div className="auth-page">
       <div className="container page">
         <div className="row">
@@ -106,10 +103,12 @@ let make ::route _children => {
                   onChange=(reduce updatePassword)
                 />
               </fieldset>
-              <button onClick=(reduce register) className="btn btn-lg btn-primary pull-xs-right"> (show "Sign up") </button>
+              <button onClick=(reduce (register self)) className="btn btn-lg btn-primary pull-xs-right"> (show "Sign up") </button>
             </form>
           </div>
         </div>
       </div>
     </div>}
+    }
+  }
 };

@@ -24,7 +24,9 @@ let sideEffect {ReasonReact.state: _state, reduce} event => {
   ReactEventRe.Mouse.preventDefault event;
 
   let updateState _status jsonPayload => {
-    jsonPayload |> Js.Promise.then_ (fun _json => reduce (fun payload => Thor payload) ("this come back from promise") |> Js.Promise.resolve)
+    jsonPayload 
+    |> Js.Promise.then_ (fun _json => reduce (fun payload => Thor payload) ("this come back from promise") 
+    |> Js.Promise.resolve)
   };
   JsonRequests.registerNewUser (updateState) (getRequest ()) |> ignore;
 
