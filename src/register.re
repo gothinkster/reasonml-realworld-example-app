@@ -33,9 +33,17 @@ let component = ReasonReact.reducerComponent "Register";
 
 let show = ReasonReact.stringToElement;
 
-let register {ReasonReact.state: _state, reduce} event => {
-  ReactEventRe.Mouse.preventDefault event;  
-  Register (false, "I got the herb.");
+let register {ReasonReact.state: state, reduce} event => {
+  ReactEventRe.Mouse.preventDefault event; 
+  let jsonRequest = Encode.user state;
+  let updateState _status jsonPayload => {
+    jsonPayload 
+    |> Js.Promise.then_ (fun _json => reduce (fun _payload => Register (true, "")) ("this come back from promise") 
+    |> Js.Promise.resolve)
+  };
+  JsonRequests.registerNewUser (updateState) jsonRequest |> ignore; 
+
+  Register (false, "Hitting server.");
 };
 
 let login _event => Login;
