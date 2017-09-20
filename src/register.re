@@ -46,18 +46,7 @@ let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.For
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
-let registrationResult reduce status json => {       
-  /* TODO: Make call to save token */  
-  /*
-  {
-  "errors":{
-      "body": [
-        "can't be empty"
-      ]
-    }
-  }
-  */
-    
+let registrationResult reduce status json => {         
   let saveToLocalStorage reply => {        
     Js.log reply;     
     () |> Js.Promise.resolve;
@@ -70,25 +59,15 @@ let registrationResult reduce status json => {
   })  |> ignore;
 };
 
-/* let registerNewUser {ReasonReact.state: state, reduce} _route => {     
+let registerNewUser {ReasonReact.state: state, reduce} _route => {     
   Encode.user state |> JsonRequests.registerNewUser (registrationResult reduce) |> ignore;
-}; */
-
-let maskOff currentState => {
-  /* this is what will get returned to the reducer in the register */
-  {...currentState, hasValidationError: true, validationError: "Username taken"}
-};
+}; 
 
 /* If we need to unit test, then we can pass in the reducer with the side effect 
    function already passed in */
 
 /* TODO: use the route to go the next home screen when registered successfully */
 let make ::route _children => {
-  let registerNewUserPrototype {ReasonReact.state: state, reduce} => {   
-    reduce (fun _ => RegisterReponse "test");
-    () /* {...state, hasValidationError: true, validationError: "this is a test message" }*/    
-  };
-
   {
   ...component,  
   initialState: fun () => {username: "", email: "", password: "", hasValidationError: false, validationError: "Drifting"},

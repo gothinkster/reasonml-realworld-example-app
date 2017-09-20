@@ -2,7 +2,6 @@
 // BuckleScript comes with its own parser for bsconfig.json, which is normal JSON, with the extra support of comments and trailing commas.
 {
   "name": "realworld-reasonml",
-  "bsc-flags": ["-bs-no-version-header", "-bs-super-errors"],
   "version": "0.1.0",
   "sources": [
     "src",
@@ -17,6 +16,7 @@
       "bs-json",
       "bs-axios"
   ],
+  "bsc-flags": ["-bs-no-version-header", "-bs-super-errors"],
   "reason": {
     "react-jsx": 2
   }
