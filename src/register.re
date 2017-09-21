@@ -38,8 +38,10 @@ let register {ReasonReact.state: state, reduce} event => {
   let jsonRequest = Encode.user state;
   let updateState _status jsonPayload => {
     jsonPayload 
-    |> Js.Promise.then_ (fun _json => reduce (fun _payload => Register (true, "")) ("this come back from promise") 
-    |> Js.Promise.resolve)
+    |> Js.Promise.then_ (fun json => {
+      Js.log json;
+      reduce (fun _payload => Register (true, "")) ("this come back from promise") 
+      |> Js.Promise.resolve })
   };
   JsonRequests.registerNewUser (updateState) jsonRequest |> ignore; 
 
@@ -59,7 +61,7 @@ let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEve
 let make ::router _children => {
   {
   ...component,  
-  initialState: fun () => {username: "", email: "", password: "", hasValidationError: false, validationError: "Drifting"},
+  initialState: fun () => {username: "", email: "", password: "", hasValidationError: false, validationError: ""},
   reducer: fun action state => {
     switch action {
       | NameUpdate value => ReasonReact.Update {...state, username: value} 

@@ -1,5 +1,6 @@
 open Bs_fetch;
 open Config;
+open Models;
 
 let make_headers (token: option string) => {
   let content_type = ("content-type", "application/json");
@@ -24,10 +25,79 @@ let toJson listedElements => {
   |> Js.Json.object_;
 };
 
+type newUserResponse = 
+  | Succeed user
+  | Failed error_response;
+
+/* Correct response:
+  {
+    "id":12010,
+    "email":"chester@gmail.com",
+    "createdAt":"2017-09-20T21:47:45.891Z",
+    "updatedAt":"2017-09-20T21:47:45.899Z",
+    "username":"Chester",
+    "bio":null,
+    "image":null,
+    "token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIwMTAsInVzZXJuYW1lIjoiQ2hlc3RlciIsImV4cCI6MTUxMTEyODA2NX0.jc_UC8m-Nb-iO7sKWxooJy1xF9ppeZ5npfXECX6ewIg"}
+  }
+*/
+
+/* Incorrect response: 
+  {
+    "errors":{
+      "email":["is invalid"],
+      "password":["is too short (minimum is 8 characters)"]
+    }
+*/
+
+let parseNormalResp json => {
+  Succeed Json.Decode.{
+    id: json |> field "id" int,
+    email: json |> field "email" string,
+    createdAt: json |> field "createdAt" string,
+    updatedAt: json |> field "updatedAt" string,
+    username: json |> field "username" string,
+    bio: None,
+    image: None,
+    token: json |> field "token" string
+  };
+};
+
+let parseErrors json => {
+  Json.Decode.{
+    email: json |> optional (field "email" (array string)),
+    password: json |> optional (field "password" (array string)),
+    username: json |> optional (field "username" (array string))
+  };
+};
+
+let parseErrorResp json => {
+  Failed Json.Decode.{
+    errors: json |> field "errors" parseErrors
+  };
+}; 
+
+let hasErrors (checkId: option int) => {
+  switch checkId {
+    | Some resp => resp == 1
+    | None => false
+  };
+};
+
+let parseNewUser responseText => {
+  let json = Js.Json.parseExn responseText;
+
+  let shouldDecodeAsResponse = 
+    Json.Decode.(json |> optional (field "id" int))
+    |> hasErrors;
+  
+  shouldDecodeAsResponse ? (parseNormalResp json) : (parseErrorResp json);
+};
+
 let registerNewUser  registerFunc jsonData => {
   open Js.Promise;  
 
   let request = make_init Post None (Some jsonData); 
   fetchWithInit (apiUrlBase ^ (mapUrl Config.Register)) request
-  |> then_ (fun response => registerFunc (Response.status response) (Response.json response) |> resolve); 
+  |> then_ (fun response => registerFunc (Response.status response) (Response.text response) |> resolve); 
 };
