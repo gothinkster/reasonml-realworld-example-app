@@ -29,27 +29,6 @@ type newUserResponse =
   | Succeed user
   | Failed error_response;
 
-/* Correct response:
-  {
-    "id":12010,
-    "email":"chester@gmail.com",
-    "createdAt":"2017-09-20T21:47:45.891Z",
-    "updatedAt":"2017-09-20T21:47:45.899Z",
-    "username":"Chester",
-    "bio":null,
-    "image":null,
-    "token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIwMTAsInVzZXJuYW1lIjoiQ2hlc3RlciIsImV4cCI6MTUxMTEyODA2NX0.jc_UC8m-Nb-iO7sKWxooJy1xF9ppeZ5npfXECX6ewIg"}
-  }
-*/
-
-/* Incorrect response: 
-  {
-    "errors":{
-      "email":["is invalid"],
-      "password":["is too short (minimum is 8 characters)"]
-    }
-*/
-
 let parseNormalResp json => {
   Succeed Json.Decode.{
     id: json |> field "id" int,

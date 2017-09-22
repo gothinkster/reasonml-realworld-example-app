@@ -40,6 +40,11 @@ let register {ReasonReact.state: state, reduce} event => {
     jsonPayload 
     |> Js.Promise.then_ (fun json => {
       Js.log json;
+      let newUser = parseNewUser json;
+      switch newUser {
+        | Succeed user => Js.log user
+        | Failed error => Js.log error
+      };
       reduce (fun _payload => Register (true, "")) ("this come back from promise") 
       |> Js.Promise.resolve })
   };

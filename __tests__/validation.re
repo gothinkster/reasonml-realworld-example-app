@@ -1,12 +1,24 @@
-/* open Jest; */
+open Jest;
+open JsonRequests;
 
-/* This is just a demonstration of using jest for testing */
-/* 
+let errorsJson = {j|{"errors":{"email":["is invalid"],"password":["is too short (minimum is 8 characters)"]}}|j};
+
+let checkEmail email => {
+  switch email {
+    | Some address => address
+    | None => ""
+  };
+};
+
 let () =
-  describe "Medium validation"
+  describe "New user request"
     ExpectJs.(fun () => {
-      test "should demonstrate a test a reason" (fun () => {
-        expect(Demo.doSomething "withArgs") |> toEqual "expectedOutput"
+      test "should respond with a decoded error" (fun () => {
+        let newUser = parseNewUser errorsJson;
+        switch newUser {
+          | Succeed _response => expect false |> toBeTruthy
+          | Failed _error => expect (true) |> toBeTruthy
+        };
       });
     }); 
-*/
+    
