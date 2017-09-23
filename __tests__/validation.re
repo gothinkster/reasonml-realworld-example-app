@@ -26,5 +26,9 @@ let () =
           };
         };
       });
+
+      test "should convert to error list" (fun () => {
+        expect false |> toBeTruthy
+      })
     }); 
     
