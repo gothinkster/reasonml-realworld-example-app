@@ -2,6 +2,18 @@ open Jest;
 open JsonRequests;
 
 let errorsJson = {j|{"errors":{"email":["is invalid"],"password":["is too short (minimum is 8 characters)"]}}|j};
+let successJson = {j|{
+  "user":{
+    "id":12123,
+    "email":"bryant@bryant.com",
+    "createdAt":"2017-09-23T09:35:16.686Z",
+    "updatedAt":"2017-09-23T09:35:16.691Z",
+    "username":"bryant",
+    "bio":null,
+    "image":null,
+    "token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIxMjMsInVzZXJuYW1lIjoiYnJ5YW50IiwiZXhwIjoxNTExMzQzMzE2fQ.WpeiSLOW2UUYrgeC0cgPkLY5v7aUC7yNKcIVMClgfCw"
+  }
+}|j};
 
 let () =
   describe "New user request"
@@ -27,8 +39,25 @@ let () =
         };
       });
 
+      test "should not have username in the error list" (fun () => {
+        let newUser = parseNewUser errorsJson;
+        switch newUser {
+          | Succeed _response => fail ""
+          | Failed error => {
+            switch error.errors.username {
+              | Some _username => fail "Username should not be included"
+              | None => expect "" |> toBe ""
+            };
+          }
+        };
+      });
+
       test "should convert to error list" (fun () => {
-        expect false |> toBeTruthy
-      })
+        expect false |> toBeTruthy;
+      });
+
+      test "" (fun () => {
+        expect false |> toBeTruthy;
+      });
     }); 
     
