@@ -1,5 +1,6 @@
 open Jest;
 open JsonRequests;
+open Convert;
 
 let errorsJson = {j|{"errors":{"email":["is invalid"],"password":["is too short (minimum is 8 characters)"]}}|j};
 let successJson = {j|{
@@ -46,13 +47,15 @@ let () =
           | Failed error => {
             switch error.errors.username {
               | Some _username => fail "Username should not be included"
-              | None => expect "" |> toBe ""
+              | None => expect "" |> toBe "" /* The type has to match the fail cases (string) */
             };
           }
         };
       });
 
       test "should convert to error list" (fun () => {
+              
+
         expect false |> toBeTruthy;
       });
 
