@@ -1,6 +1,7 @@
 open Jest;
 open JsonRequests;
 open Convert;
+open Models;
 
 let errorsJson = {j|{"errors":{"email":["is invalid"],"password":["is too short (minimum is 8 characters)"]}}|j};
 let successJson = {j|{
@@ -54,13 +55,16 @@ let () =
       });
 
       test "should convert to error list" (fun () => {
-              
-
-        expect false |> toBeTruthy;
-      });
-
-      test "" (fun () => {
-        expect false |> toBeTruthy;
-      });
+        let errorGraph = { 
+          errors : { 
+            email: Some [|"is invalid"|], 
+            password: Some [|"is too short (minimum is 8 characters)"|],
+            username: None
+          } 
+        };  
+        let errorsList = toErrorListFromResponse errorGraph;    
+        
+        expect (List.nth errorsList 0) |> toBe "Email is invalid";
+      });      
     }); 
     
