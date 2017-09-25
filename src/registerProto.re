@@ -16,7 +16,7 @@ let trigger {ReasonReact.state: state, reduce} =>
 let getRequest () => {
   open Register;
 
-  {username: "", password: "", email: "", hasValidationError:false, validationError: ""}
+  {username: "", password: "", email: "", hasValidationError:false, errorList: []}
   |> Encode.user
 };
 

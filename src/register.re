@@ -12,7 +12,7 @@ type state = {
   email: string,
   password: string,
   hasValidationError: bool,
-  validationError: string  
+  errorList: list string  
 };
 
 module Encode = {
@@ -59,6 +59,7 @@ let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.For
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
+let errorDisplayList state => List.map (fun errorMessage => <ul className="error-messages" > <li> (show errorMessage) </li> </ul> ) state.errorList;
 /* If we need to unit test, then we can pass in the reducer with the side effect 
    function already passed in */
 
@@ -66,14 +67,14 @@ let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEve
 let make ::router _children => {
   {
   ...component,  
-  initialState: fun () => {username: "", email: "", password: "", hasValidationError: false, validationError: ""},
+  initialState: fun () => {username: "", email: "", password: "", hasValidationError: false, errorList: []},
   reducer: fun action state => {
     switch action {
       | NameUpdate value => ReasonReact.Update {...state, username: value} 
       | EmailUpdate value => ReasonReact.Update {...state, email: value}
       | PasswordUpdate value => ReasonReact.Update {...state, password: value}
       | Login => ReasonReact.NoUpdate
-      | Register (hasError, message) => ReasonReact.Update {...state, hasValidationError: hasError, validationError: message }  
+      | Register (hasError, _errorList) => ReasonReact.Update {...state, hasValidationError: hasError }  
   }},       
   render: fun self => {
     let {ReasonReact.state: state, reduce} = self;
@@ -84,9 +85,8 @@ let make ::router _children => {
           <div className="col-md-6 offset-md-3 col-xs-12">
             <h1 className="text-xs-center"> (show "Sign up") </h1>
             <p className="text-xs-center"> <a href=""> (show "Have an account?") </a> </p>
-            (show state.validationError)
             ( if state.hasValidationError {
-              <ul className="error-messages" > <li> (show state.validationError) </li> </ul> 
+              Array.of_list (errorDisplayList state) |> ReasonReact.arrayToElement;
             } else {
               ReasonReact.nullElement
             })            
