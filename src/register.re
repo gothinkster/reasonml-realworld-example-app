@@ -43,14 +43,9 @@ let register {ReasonReact.state: state, reduce} event => {
       let newUser = parseNewUser json;
       let updatedState = 
         switch newUser {
-          | Succeed user => { 
-            Js.log user;
-            {...state, hasValidationError: false}
-          }
-          | Failed errors => { 
-            Js.log errors; 
-            {...state, hasValidationError: true, errorList: errors |> Convert.toErrorListFromResponse}
-          }
+          | Succeed _user => {...state, hasValidationError: false}          
+          | Failed errors => {...state, hasValidationError: true, errorList: errors |> Convert.toErrorListFromResponse}
+          
         };
       reduce (fun _payload => Register (updatedState.hasValidationError, updatedState.errorList)) ("this come back from promise") 
       |> Js.Promise.resolve })
