@@ -2,7 +2,7 @@ open JsonRequests;
 
 type action =
   | Login
-  | Register (bool, string)
+  | Register (bool, list string)
   | NameUpdate string
   | EmailUpdate string
   | PasswordUpdate string;
@@ -41,16 +41,23 @@ let register {ReasonReact.state: state, reduce} event => {
     |> Js.Promise.then_ (fun json => {
       Js.log json;
       let newUser = parseNewUser json;
-      switch newUser {
-        | Succeed user => Js.log user
-        | Failed error => Js.log error
-      };
-      reduce (fun _payload => Register (true, "")) ("this come back from promise") 
+      let updatedState = 
+        switch newUser {
+          | Succeed user => { 
+            Js.log user;
+            {...state, hasValidationError: false}
+          }
+          | Failed errors => { 
+            Js.log errors; 
+            {...state, hasValidationError: true, errorList: errors |> Convert.toErrorListFromResponse}
+          }
+        };
+      reduce (fun _payload => Register (updatedState.hasValidationError, updatedState.errorList)) ("this come back from promise") 
       |> Js.Promise.resolve })
   };
   JsonRequests.registerNewUser (updateState) jsonRequest |> ignore; 
 
-  Register (false, "Hitting server.");
+  Register (false, ["Hitting server."]);
 };
 
 let login _event => Login;
@@ -74,7 +81,7 @@ let make ::router _children => {
       | EmailUpdate value => ReasonReact.Update {...state, email: value}
       | PasswordUpdate value => ReasonReact.Update {...state, password: value}
       | Login => ReasonReact.NoUpdate
-      | Register (hasError, _errorList) => ReasonReact.Update {...state, hasValidationError: hasError }  
+      | Register (hasError, errorList) => ReasonReact.Update {...state, hasValidationError: hasError, errorList: errorList }  
   }},       
   render: fun self => {
     let {ReasonReact.state: state, reduce} = self;
