@@ -38,16 +38,14 @@ let register {ReasonReact.state: state, reduce} event => {
   let jsonRequest = Encode.user state;
   let updateState _status jsonPayload => {
     jsonPayload 
-    |> Js.Promise.then_ (fun json => {
-      Js.log json;
+    |> Js.Promise.then_ (fun json => {      
       let newUser = parseNewUser json;
       let updatedState = 
         switch newUser {
           | Succeed _user => {...state, hasValidationError: false}          
-          | Failed errors => {...state, hasValidationError: true, errorList: errors |> Convert.toErrorListFromResponse}
-          
+          | Failed errors => {...state, hasValidationError: true, errorList: errors |> Convert.toErrorListFromResponse}          
         };
-      reduce (fun _payload => Register (updatedState.hasValidationError, updatedState.errorList)) ("this come back from promise") 
+      reduce (fun _payload => Register (updatedState.hasValidationError, updatedState.errorList)) ("this came back from promise") 
       |> Js.Promise.resolve })
   };
   JsonRequests.registerNewUser (updateState) jsonRequest |> ignore; 
