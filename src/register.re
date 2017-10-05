@@ -45,7 +45,6 @@ let register {ReasonReact.state: state, reduce} event => {
         switch newUser {
           | Succeed _user => {...state, hasValidationError: false}          
           | Failed errors => {...state, hasValidationError: true, errorList: errors |> Convert.toErrorListFromResponse}
-          
         };
       reduce (fun _payload => Register (updatedState.hasValidationError, updatedState.errorList)) ("this come back from promise") 
       |> Js.Promise.resolve })
@@ -61,7 +60,9 @@ let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.For
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
-let errorDisplayList state => List.map (fun errorMessage => <ul className="error-messages" > <li> (show errorMessage) </li> </ul> ) state.errorList;
+let errorDisplayList state => 
+  List.filter (fun errorMessage => String.length errorMessage > 0) state.errorList
+  |> List.map (fun errorMessage => <ul className="error-messages" > <li> (show errorMessage) </li> </ul> );
 /* If we need to unit test, then we can pass in the reducer with the side effect 
    function already passed in */
 
