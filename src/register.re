@@ -33,7 +33,7 @@ let component = ReasonReact.reducerComponent "Register";
 
 let show = ReasonReact.stringToElement;
 
-let register {ReasonReact.state: state, reduce} event => {
+let register route {ReasonReact.state: state, reduce} event => {
   ReactEventRe.Mouse.preventDefault event; 
   let jsonRequest = Encode.user state;
   let updateState _status jsonPayload => {
@@ -42,9 +42,13 @@ let register {ReasonReact.state: state, reduce} event => {
       let newUser = parseNewUser json;
       let updatedState = 
         switch newUser {
-          | Succeed _user => {...state, hasValidationError: false}          
+          | Succeed _user => {
+              DirectorRe.setRoute route "/home";
+              {...state, hasValidationError: false}
+            }
           | Failed errors => {...state, hasValidationError: true, errorList: errors |> Convert.toErrorListFromResponse}
         };
+        
       reduce (fun _payload => Register (updatedState.hasValidationError, updatedState.errorList)) ("this came back from promise") 
       |> Js.Promise.resolve })
   };
@@ -54,16 +58,13 @@ let register {ReasonReact.state: state, reduce} event => {
 };
 
 let login _event => Login;
-
 let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
 let errorDisplayList state => 
   List.filter (fun errorMessage => String.length errorMessage > 0) state.errorList
-  |> List.map (fun errorMessage => <ul className="error-messages" > <li> (show errorMessage) </li> </ul> );
-/* If we need to unit test, then we can pass in the reducer with the side effect 
-   function already passed in */
+  |> List.mapi (fun acc => fun errorMessage =>  <ul className="error-messages" key=(string_of_int acc) > <li> (show errorMessage) </li> </ul> );
 
 /* TODO: use the route to go the next home screen when registered successfully */
 let make ::router _children => {
@@ -120,7 +121,7 @@ let make ::router _children => {
                   onChange=(reduce updatePassword)
                 />
               </fieldset>
-              <button onClick=(reduce (register self)) className="btn btn-lg btn-primary pull-xs-right"> (show "Sign up") </button>
+              <button onClick=(reduce (register router self)) className="btn btn-lg btn-primary pull-xs-right"> (show "Sign up") </button>
             </form>
           </div>
         </div>
