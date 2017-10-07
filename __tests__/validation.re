@@ -65,6 +65,15 @@ let () =
         let errorsList = toErrorListFromResponse errorGraph;    
         
         expect (List.nth errorsList 0) |> toBe "Email is invalid";
-      });      
+      });  
+      
+      test "should properly parse a successful registration" (fun () => {
+        let newUser = parseNewUser successJson;
+        Js.log newUser;
+        switch newUser {
+          | Succeed user => expect user.id |> toBe 12123
+          | Failed _message => expect 0 |> toEqual 1
+        };
+      })
     }); 
     

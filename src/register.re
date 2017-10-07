@@ -38,7 +38,7 @@ let register route {ReasonReact.state: state, reduce} event => {
   let jsonRequest = Encode.user state;
   let updateState _status jsonPayload => {
     jsonPayload 
-    |> Js.Promise.then_ (fun json => {      
+    |> Js.Promise.then_ (fun json => { 
       let newUser = parseNewUser json;
       let updatedState = 
         switch newUser {
