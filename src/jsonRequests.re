@@ -29,7 +29,7 @@ type newUserResponse =
   | Succeed user
   | Failed error_response;
 
-let parseNormalResp json => {
+let parseNormalResp json => {  
   Succeed Json.Decode.{
     id: json |> field "id" int,
     email: json |> field "email" string,
@@ -56,9 +56,9 @@ let parseErrorResp json => {
   };
 }; 
 
-let hasErrors (checkId: option int) => {
+let hasErrors (checkId: option newUserResponse) => {  
   switch checkId {
-    | Some resp => resp == 1
+    | Some _resp => true
     | None => false
   };
 };
@@ -67,8 +67,8 @@ let parseNewUser responseText => {
   let json = Js.Json.parseExn responseText;
 
   let shouldDecodeAsResponse = 
-    Json.Decode.(json |> optional (field "id" int))
-    |> hasErrors;
+    Json.Decode.(json |> optional (field "user" parseNormalResp))
+    |> hasErrors;    
   
   shouldDecodeAsResponse ? (parseNormalResp json) : (parseErrorResp json);
 };

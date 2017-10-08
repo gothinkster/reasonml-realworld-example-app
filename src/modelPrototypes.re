@@ -9,19 +9,13 @@ type user = {
   token: string
 };
 
-type error_details = {
+type errorDetails = {
   email: option (array string),
   password: option (array string),
   username: option (array string)
 };
 
-type error_response = {
-  errors: error_details
+type newRegisteredUser = {
+  errors: errorDetails,
+  user: user
 };
-
-module Prototyping = {
-  type registrar = {    
-    user: user,
-    errors: error_details
-  };
-}

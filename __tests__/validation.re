@@ -1,7 +1,6 @@
 open Jest;
 open JsonRequests;
 open Convert;
-open Models;
 
 let errorsJson = {j|{"errors":{"email":["is invalid"],"password":["is too short (minimum is 8 characters)"]}}|j};
 let successJson = {j|{
@@ -16,6 +15,26 @@ let successJson = {j|{
     "token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIxMjMsInVzZXJuYW1lIjoiYnJ5YW50IiwiZXhwIjoxNTExMzQzMzE2fQ.WpeiSLOW2UUYrgeC0cgPkLY5v7aUC7yNKcIVMClgfCw"
   }
 }|j};
+
+let succesWithJson = {j|{
+  "errors":{
+    "email": null,
+    "password": null,
+    "username": null
+  },
+  "user":{
+    "id":12123,
+    "email":"bryant@bryant.com",
+    "createdAt":"2017-09-23T09:35:16.686Z",
+    "updatedAt":"2017-09-23T09:35:16.691Z",
+    "username":"bryant",
+    "bio":null,
+    "image":null,
+    "token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIxMjMsInVzZXJuYW1lIjoiYnJ5YW50IiwiZXhwIjoxNTExMzQzMzE2fQ.WpeiSLOW2UUYrgeC0cgPkLY5v7aUC7yNKcIVMClgfCw"
+  }
+}|j};
+
+
 
 let () =
   describe "New user request"
@@ -55,13 +74,14 @@ let () =
       });
 
       test "should convert to error list" (fun () => {
-        let errorGraph = { 
+        
+        let errorGraph = Models.( { 
           errors : { 
             email: Some [|"is invalid"|], 
             password: Some [|"is too short (minimum is 8 characters)"|],
             username: None
           } 
-        };  
+        });
         let errorsList = toErrorListFromResponse errorGraph;    
         
         expect (List.nth errorsList 0) |> toBe "Email is invalid";
@@ -69,11 +89,46 @@ let () =
       
       test "should properly parse a successful registration" (fun () => {
         let newUser = parseNewUser successJson;
-        Js.log newUser;
+        
         switch newUser {
           | Succeed user => expect user.id |> toBe 12123
           | Failed _message => expect 0 |> toEqual 1
-        };
-      })
-    }); 
+        }; 
+        expect "" |> toBe "";
+      });
+
+      test "example parse" (fun () => {
+        let json = Js.Json.parseExn succesWithJson;        
+                 
+        let parseError jsonToParse => ModelPrototypes.(             
+          Json.Decode.{
+            email: None,
+            password: None,
+            username: None
+          }
+        );
+
+        let parseUser jsonToParse => ModelPrototypes.(
+          Json.Decode.{
+            id: jsonToParse |> field "id" int,
+            email: jsonToParse |> field "email" string,
+            createdAt: jsonToParse |> field "createdAt" string,
+            updatedAt: jsonToParse |> field "updatedAt" string,
+            username: jsonToParse |> field "username" string,
+            bio: None,
+            image: None,
+            token: jsonToParse |> field "token" string
+          }
+        );
+
+        let hydrated = ModelPrototypes.(
+          Json.Decode.{
+            errors: json |> field "errors" parseError,
+            user: json |> field "user" parseUser
+          }
+        );
+
+        expect "" |> toBe ""
+      });
+    });    
     
