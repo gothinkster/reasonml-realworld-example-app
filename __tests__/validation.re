@@ -34,8 +34,6 @@ let succesWithJson = {j|{
   }
 }|j};
 
-
-
 let () =
   describe "New user request"
     ExpectJs.(fun () => {
@@ -123,11 +121,17 @@ let () =
 
         let hydrated = ModelPrototypes.(
           Json.Decode.{
-            errors: json |> field "errors" parseError,
-            user: json |> field "user" parseUser
+            errors: json |> optional (field "errors" parseError),
+            user: json |> optional (field "user" parseUser)
           }
         );
 
+        {
+          /* Check the option types and deconstruct the errors or user as needed */
+          open ModelPrototypes;
+          let {errors} = hydrated;  
+        };
+        
         expect "" |> toBe ""
       });
     });    
