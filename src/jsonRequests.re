@@ -11,7 +11,7 @@ let make_headers (token: option string) => {
 };
 
 let makeInit method_ token (data: option Js.Json.t) => {
-  let defaultInit =        
+  let defaultInit =
     RequestInit.make ::method_ headers::(HeadersInit.makeWithArray @@ make_headers token);
 
   switch data {
@@ -21,16 +21,16 @@ let makeInit method_ token (data: option Js.Json.t) => {
 
 let toJson listedElements => {
   listedElements
-  |> Js.Dict.fromList 
+  |> Js.Dict.fromList
   |> Js.Json.object_;
 };
 
-type newUserResponse = 
+type newUserResponse =
   | Succeed user
-  | Failed error_response;
+  | Failed user;
 
-let parseNormalResp json => {  
-  Succeed Json.Decode.{
+let parseUser json => {
+  Json.Decode.{
     id: json |> field "id" int,
     email: json |> field "email" string,
     createdAt: json |> field "createdAt" string,
@@ -42,8 +42,36 @@ let parseNormalResp json => {
   };
 };
 
-let parseErrors json => {
+let parseEmptyError () => {
   Json.Decode.{
+    email: None,
+    password: None,
+    username: None
+  };
+};
+
+let parseEmptyDefaultError () => {
+  Json.Decode.{
+    id: 0,
+    email: "",
+    createdAt: "",
+    updatedAt: "",
+    username: "",
+    bio: None,
+    image: None,
+    token: ""
+  };
+};
+
+let parseNormalResp json => {
+  Json.Decode.{
+    user: parseUser json,
+    errors: None
+  };
+};
+
+let parseErrors json => {
+  Some Json.Decode.{
     email: json |> optional (field "email" (array string)),
     password: json |> optional (field "password" (array string)),
     username: json |> optional (field "username" (array string))
@@ -51,36 +79,33 @@ let parseErrors json => {
 };
 
 let parseErrorResp json => {
-  Failed Json.Decode.{
+  Json.Decode.{    
+    user: parseEmptyDefaultError (),
     errors: json |> field "errors" parseErrors
   };
-}; 
+};
 
-let hasErrors (checkId: option newUserResponse) => {  
+let hasErrors (checkId) => {
   switch checkId {
     | Some _resp => true
     | None => false
   };
 };
 
-let parseRegisteredUser _responseText => {
-  ()
-};
-
 let parseNewUser responseText => {
   let json = Js.Json.parseExn responseText;
 
-  let shouldDecodeAsResponse = 
+  let shouldDecodeAsResponse =
     Json.Decode.(json |> optional (field "user" parseNormalResp))
-    |> hasErrors;    
-  
+    |> hasErrors;
+
   shouldDecodeAsResponse ? (parseNormalResp json) : (parseErrorResp json);
 };
 
 let registerNewUser registerFunc jsonData => {
-  open Js.Promise;  
+  open Js.Promise;
 
-  let request = makeInit Post None (Some jsonData); 
+  let request = makeInit Post None (Some jsonData);
   fetchWithInit (apiUrlBase ^ (mapUrl Config.Register)) request
-  |> then_ (fun response => registerFunc (Response.status response) (Response.text response) |> resolve); 
+  |> then_ (fun response => registerFunc (Response.status response) (Response.text response) |> resolve);
 };

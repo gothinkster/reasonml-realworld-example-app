@@ -41,12 +41,12 @@ let register route {ReasonReact.state: state, reduce} event => {
     |> Js.Promise.then_ (fun json => { 
       let newUser = parseNewUser json;
       let updatedState = 
-        switch newUser {
-          | Succeed _user => {
+        switch newUser.errors {
+          | Some _user => {
               DirectorRe.setRoute route "/home";
               {...state, hasValidationError: false}
             }
-          | Failed errors => {...state, hasValidationError: true, errorList: errors |> Convert.toErrorListFromResponse}
+          | None  => {...state, hasValidationError: true, errorList: newUser |> Convert.toErrorListFromResponse}
         };
         
       reduce (fun _payload => Register (updatedState.hasValidationError, updatedState.errorList)) ("this came back from promise") 

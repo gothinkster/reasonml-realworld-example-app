@@ -8,8 +8,13 @@ let formatError fieldName value => {
   };
 };
 
-let toErrorListFromResponse errorGraph => {  
-  (formatError "Email" errorGraph.errors.email |> Array.to_list) @ 
-  (formatError "Username" errorGraph.errors.username |> Array.to_list) @
-  (formatError "Password" errorGraph.errors.password |> Array.to_list)
+let toErrorListFromResponse errorGraph => {
+  switch errorGraph.errors {
+    | Some errors => {
+        (formatError "Email" errors.email |> Array.to_list) @
+        (formatError "Username" errors.username |> Array.to_list) @
+        (formatError "Password" errors.password |> Array.to_list)
+      }
+    | None => []
+  };
 };
