@@ -19,9 +19,3 @@ type error_response = {
   errors: error_details
 };
 
-module Prototyping = {
-  type registrar = {    
-    user: user,
-    errors: error_details
-  };
-}

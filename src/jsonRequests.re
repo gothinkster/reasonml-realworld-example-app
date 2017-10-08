@@ -63,6 +63,10 @@ let hasErrors (checkId: option newUserResponse) => {
   };
 };
 
+let parseRegisteredUser _responseText => {
+  ()
+};
+
 let parseNewUser responseText => {
   let json = Js.Json.parseExn responseText;
 

@@ -16,6 +16,8 @@ type errorDetails = {
 };
 
 type newRegisteredUser = {
-  errors: errorDetails,
-  user: user
+  errors: option errorDetails,
+  user: option user,
 };
+
+let checkScope = 10;
