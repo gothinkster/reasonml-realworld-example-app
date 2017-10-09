@@ -26,3 +26,4 @@ lib/bs
 node_modules/
 tasks.json
 lib/js/*
+npm-debug.log
