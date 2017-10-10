@@ -92,9 +92,14 @@ let hasErrors (checkId) => {
   };
 };
 
+let tee func output => {
+  func (output);
+  output
+};
+
 let parseNewUser responseText => {
   let json = Js.Json.parseExn responseText;
-
+  
   let shouldDecodeAsResponse =
     Json.Decode.(json |> optional (field "user" parseNormalResp))
     |> hasErrors;

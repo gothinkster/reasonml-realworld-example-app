@@ -1,15 +1,9 @@
 open Jest;
 open JsonRequests;
-open Convert;
 
 let errorsJson = {j|{"errors":{"email":["is invalid"],"password":["is too short (minimum is 8 characters)"]}}|j};
 
 let succesWithJson = {j|{
-  "errors":{
-    "email": null,
-    "password": null,
-    "username": null
-  },
   "user":{
     "id":12123,
     "email":"bryant@bryant.com",
@@ -27,10 +21,36 @@ let () =
     ExpectJs.(fun () => {
       test "should respond with a decoded error" (fun () => {
         let newUser = parseNewUser errorsJson;
-        Js.log newUser;
+        
         switch newUser.errors {
           | Some _response => expect true |> toBeTruthy
           | None => expect (false) |> toBeTruthy
         };
-      });      
+      }); 
+      
+      test "should have an invalid email" (fun () => {
+        let newUser = parseNewUser errorsJson;
+        
+        switch newUser.errors {
+          | Some errorList => 
+            switch errorList.email {
+            | Some error => expect (Array.get error 0) |> toBe "is invalid"
+            | None => fail "this has failed"
+            }
+          | None => fail "this has failed"
+        }; 
+      });
+
+      test "should have an error where the password is too short" (fun () => {
+        let newUser = parseNewUser errorsJson;
+
+        switch newUser.errors {
+          | Some errorList => 
+            switch errorList.password {
+              | Some password => expect (Array.get password 0) |> toBe "is too short (minimum is 8 characters)"
+              | None => fail "Failed to check password validation"
+            };
+          | None => fail "Failed to return any errors"
+        };
+      });
     });
