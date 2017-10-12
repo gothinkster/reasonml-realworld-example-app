@@ -29,8 +29,6 @@ type newUserResponse =
   | Failed user;
 
 let parseUser json => {
-  Js.log "Normal parse user.";
-  Js.log json;
   Json.Decode.{
     id: json |> field "id" int,
     email: json |> field "email" string,
@@ -79,7 +77,7 @@ let parseErrors json => {
 };
 
 let parseErrorResp errors => {
-  {    
+  {
     user: parseEmptyDefaultError (),
     errors: errors
   };
@@ -111,7 +109,7 @@ let registerNewUser registerFunc jsonData => {
   open Js.Promise;
 
   let request = makeInit Post None (Some jsonData);
-  
+
   {
     open Bs_fetch;
     fetchWithInit (apiUrlBase ^ (mapUrl Config.Register)) request
