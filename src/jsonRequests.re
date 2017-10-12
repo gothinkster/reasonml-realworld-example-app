@@ -1,4 +1,3 @@
-open Bs_fetch;
 open Config;
 open Models;
 
@@ -12,11 +11,11 @@ let make_headers (token: option string) => {
 
 let makeInit method_ token (data: option Js.Json.t) => {
   let defaultInit =
-    RequestInit.make ::method_ headers::(HeadersInit.makeWithArray @@ make_headers token);
+    Bs_fetch.RequestInit.make ::method_ headers::(Bs_fetch.HeadersInit.makeWithArray @@ make_headers token);
 
   switch data {
   | None => defaultInit ()
-  | Some d => defaultInit body::(BodyInit.make @@ Js.Json.stringify d) ()
+  | Some d => defaultInit body::(Bs_fetch.BodyInit.make @@ Js.Json.stringify d) ()
   }};
 
 let toJson listedElements => {
@@ -30,6 +29,8 @@ type newUserResponse =
   | Failed user;
 
 let parseUser json => {
+  Js.log "Normal parse user.";
+  Js.log json;
   Json.Decode.{
     id: json |> field "id" int,
     email: json |> field "email" string,
@@ -42,7 +43,7 @@ let parseUser json => {
   };
 };
 
-let parseEmptyError () => {
+let parseEmptyError _json => {
   Json.Decode.{
     email: None,
     password: None,
@@ -64,8 +65,7 @@ let parseEmptyDefaultError () => {
 };
 
 let parseNormalResp json => {
-  Json.Decode.{
-    user: parseUser json,
+  { user: Json.Decode.(json |> field "user" parseUser),
     errors: None
   };
 };
@@ -78,10 +78,10 @@ let parseErrors json => {
   };
 };
 
-let parseErrorResp json => {
-  Json.Decode.{    
+let parseErrorResp errors => {
+  {    
     user: parseEmptyDefaultError (),
-    errors: json |> field "errors" parseErrors
+    errors: errors
   };
 };
 
@@ -99,18 +99,22 @@ let tee func output => {
 
 let parseNewUser responseText => {
   let json = Js.Json.parseExn responseText;
-  
-  let shouldDecodeAsResponse =
-    Json.Decode.(json |> optional (field "user" parseNormalResp))
-    |> hasErrors;
 
-  shouldDecodeAsResponse ? (parseNormalResp json) : (parseErrorResp json);
+  let possibleErrors = Json.Decode.(json |> optional (field "errors" parseErrors));
+  switch possibleErrors {
+    | Some errors => parseErrorResp errors
+    | None => parseNormalResp json
+  };
 };
 
 let registerNewUser registerFunc jsonData => {
   open Js.Promise;
 
   let request = makeInit Post None (Some jsonData);
-  fetchWithInit (apiUrlBase ^ (mapUrl Config.Register)) request
-  |> then_ (fun response => registerFunc (Response.status response) (Response.text response) |> resolve);
+  
+  {
+    open Bs_fetch;
+    fetchWithInit (apiUrlBase ^ (mapUrl Config.Register)) request
+    |> then_ (fun response => registerFunc (Response.status response) (Response.text response) |> resolve);
+  }
 };

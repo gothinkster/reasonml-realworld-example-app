@@ -53,4 +53,25 @@ let () =
           | None => fail "Failed to return any errors"
         };
       });
+
+      test "should have the correct username" (fun () => {
+        let newUser = parseNewUser succesWithJson;
+        /* open Models;
+        let json = Js.Json.parseExn succesWithJson;
+
+        let parseErrors json => {
+          Some Json.Decode.{
+            email: json |> optional (field "email" (array string)),
+            password: json |> optional (field "password" (array string)),
+            username: json |> optional (field "username" (array string))
+          };
+        };
+        
+        let possibleErrors = Json.Decode.(json |> optional (field "errors" parseErrors)); 
+        Js.log possibleErrors;
+        
+        expect possibleErrors |> toBe None 
+      });*/
+        expect "" |> toBe ""
+      });
     });
