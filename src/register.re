@@ -12,7 +12,7 @@ type state = {
   email: string,
   password: string,
   hasValidationError: bool,
-  errorList: list string  
+  errorList: list string
 };
 
 module Encode = {
@@ -24,23 +24,23 @@ module Encode = {
   let user r =>
     Json.Encode.(
       object_ [
-        ("user", encodeUserCredentials r )        
+        ("user", encodeUserCredentials r )
       ]
     );
-}; 
+};
 
 let component = ReasonReact.reducerComponent "Register";
 
 let show = ReasonReact.stringToElement;
 
 let register route {ReasonReact.state: state, reduce} event => {
-  ReactEventRe.Mouse.preventDefault event; 
+  ReactEventRe.Mouse.preventDefault event;
   let jsonRequest = Encode.user state;
   let updateState _status jsonPayload => {
-    jsonPayload 
-    |> Js.Promise.then_ (fun json => { 
+    jsonPayload
+    |> Js.Promise.then_ (fun json => {
       let newUser = parseNewUser json;
-      let updatedState = 
+      let updatedState =
         switch newUser.errors {
           | Some _user => {
               DirectorRe.setRoute route "/home";
@@ -48,11 +48,11 @@ let register route {ReasonReact.state: state, reduce} event => {
             }
           | None  => {...state, hasValidationError: true, errorList: newUser |> Convert.toErrorListFromResponse}
         };
-        
-      reduce (fun _payload => Register (updatedState.hasValidationError, updatedState.errorList)) ("this came back from promise") 
+
+      reduce (fun _payload => Register (updatedState.hasValidationError, updatedState.errorList)) ("this came back from promise")
       |> Js.Promise.resolve })
   };
-  JsonRequests.registerNewUser (updateState) jsonRequest |> ignore; 
+  JsonRequests.registerNewUser (updateState) jsonRequest |> ignore;
 
   Register (false, ["Hitting server."]);
 };
@@ -63,27 +63,27 @@ let goToLogin router event => {
 };
 
 let login _event => Login;
-let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
-let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
-let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
+let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value;
+let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value;
+let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value;
 
-let errorDisplayList state => 
+let errorDisplayList state =>
   List.filter (fun errorMessage => String.length errorMessage > 0) state.errorList
   |> List.mapi (fun acc => fun errorMessage =>  <ul className="error-messages" key=(string_of_int acc) > <li> (show errorMessage) </li> </ul> );
 
 /* TODO: use the route to go the next home screen when registered successfully */
 let make ::router _children => {
   {
-  ...component,  
+  ...component,
   initialState: fun () => {username: "", email: "", password: "", hasValidationError: false, errorList: []},
   reducer: fun action state => {
     switch action {
-      | NameUpdate value => ReasonReact.Update {...state, username: value} 
+      | NameUpdate value => ReasonReact.Update {...state, username: value}
       | EmailUpdate value => ReasonReact.Update {...state, email: value}
       | PasswordUpdate value => ReasonReact.Update {...state, password: value}
       | Login => ReasonReact.NoUpdate
-      | Register (hasError, errorList) => ReasonReact.Update {...state, hasValidationError: hasError, errorList: errorList }  
-  }},       
+      | Register (hasError, errorList) => ReasonReact.Update {...state, hasValidationError: hasError, errorList: errorList }
+  }},
   render: fun self => {
     let {ReasonReact.state: state, reduce} = self;
     {
@@ -97,7 +97,7 @@ let make ::router _children => {
               Array.of_list (errorDisplayList state) |> ReasonReact.arrayToElement;
             } else {
               ReasonReact.nullElement
-            })            
+            })
             <form>
               <fieldset className="form-group">
                 <input
