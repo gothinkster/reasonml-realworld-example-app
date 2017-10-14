@@ -57,6 +57,11 @@ let register route {ReasonReact.state: state, reduce} event => {
   Register (false, ["Hitting server."]);
 };
 
+let goToLogin router event => {
+  ReactEventRe.Mouse.preventDefault event;
+  DirectorRe.setRoute router "/login";
+};
+
 let login _event => Login;
 let updateName event => NameUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
@@ -87,7 +92,7 @@ let make ::router _children => {
         <div className="row">
           <div className="col-md-6 offset-md-3 col-xs-12">
             <h1 className="text-xs-center"> (show "Sign up") </h1>
-            <p className="text-xs-center"> <a href=""> (show "Have an account?") </a> </p>
+            <p className="text-xs-center"> <a href="#" onClick={goToLogin router}> (show "Have an account?") </a> </p>
             ( if state.hasValidationError {
               Array.of_list (errorDisplayList state) |> ReasonReact.arrayToElement;
             } else {
