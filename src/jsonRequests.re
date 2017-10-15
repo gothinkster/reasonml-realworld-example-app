@@ -116,3 +116,17 @@ let registerNewUser registerFunc jsonData => {
     |> then_ (fun response => registerFunc (Response.status response) (Response.text response) |> resolve);
   }
 };
+
+let sendRequest jsonData actionFunc url => {
+  open Js.Promise;
+  
+  let request = makeInit Post None (Some jsonData);
+
+  {
+    open Bs_fetch;
+    fetchWithInit (apiUrlBase ^ (mapUrl url)) request
+    |> then_ (fun response => actionFunc (Response.status response) (Response.text response) |> resolve);
+  }
+};
+
+let authenticateUser loginFunc jsonData => sendRequest jsonData loginFunc Config.Authenticate;

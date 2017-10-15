@@ -9,22 +9,23 @@ type state = {
 };
 
 type action =
-  | Login
+  | Login (bool, list string)
   | EmailUpdate string
-  | PasswordUpdate string;
+  | PasswordUpdate string
+  | LoginPending;
 
 let goToRegister router event => {
   ReactEventRe.Mouse.preventDefault event;
   DirectorRe.setRoute router "/register";
 };
 
-let login _event => Login;
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
 let loginUser route {ReasonReact.state: state, reduce} event => {
-  Js.log "log in the current user";
-  Login
+  ReactEventRe.Mouse.preventDefault event;
+  
+  LoginPending
 };
 let component = ReasonReact.reducerComponent "Login";
 let make ::router _children => {
@@ -35,7 +36,8 @@ let make ::router _children => {
     switch action {
       | EmailUpdate value => ReasonReact.Update {...state, email: value}
       | PasswordUpdate value => ReasonReact.Update {...state, password: value}
-      | Login => ReasonReact.NoUpdate
+      | Login (hasError, errorList) => ReasonReact.Update {...state, hasValidationError: hasError, errorList: errorList }
+      | LoginPending => ReasonReact.NoUpdate
   }},       
   render: fun self => {
     let {ReasonReact.state: state, reduce} = self;
@@ -44,7 +46,7 @@ let make ::router _children => {
       <div className="container page">
         <div className="row">
           <div className="col-md-6 offset-md-3 col-xs-12">
-            <h1 className="text-xs-center"> (show "Sign up") </h1>
+            <h1 className="text-xs-center"> (show "Sign in") </h1>
             <p className="text-xs-center"> <a href="#" onClick={goToRegister router}> (show "Need an account?") </a> </p>            
             <form>
               <fieldset className="form-group">
