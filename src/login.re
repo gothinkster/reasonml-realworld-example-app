@@ -1,4 +1,3 @@
-let component = ReasonReact.statelessComponent "Login";
 let show = ReasonReact.stringToElement;
 
 type state = {
@@ -19,12 +18,41 @@ let goToRegister router event => {
   DirectorRe.setRoute router "/register";
 };
 
+module Encode = {
+  let encodeUserCredentials creds => {
+    open! Json.Encode;
+    object_ [("email", string creds.email), ("password", string creds.password)]
+  };
+
+  let user topLevelUser =>
+    Json.Encode.(
+      object_ [
+        ("user", encodeUserCredentials topLevelUser)
+      ]
+    );
+};
+
 let updateEmail event => EmailUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 let updatePassword event => PasswordUpdate (ReactDOMRe.domElementToObj (ReactEventRe.Form.target event))##value; 
 
 let loginUser route {ReasonReact.state: state, reduce} event => {
   ReactEventRe.Mouse.preventDefault event;
-  
+  JsonRequests.authenticateUser (fun _status jsonPayload => {
+    jsonPayload
+    |> Js.Promise.then_ (fun json => {
+      let newUser = JsonRequests.parseCurrentUser json;
+      let updatedState =
+        switch newUser.errors {
+          | Some _user => {
+              DirectorRe.setRoute route "/home";
+              {...state, hasValidationError: false}
+            }
+          | None  => {...state, hasValidationError: true, errorList: newUser |> Convert.toErrorListFromResponse}
+        };
+
+      reduce (fun _payload => Login (updatedState.hasValidationError, updatedState.errorList)) ("this came back from promise")
+      |> Js.Promise.resolve })
+  }) (Encode.user state) |> ignore;
   LoginPending
 };
 let component = ReasonReact.reducerComponent "Login";

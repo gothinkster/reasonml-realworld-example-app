@@ -90,6 +90,10 @@ let hasErrors (checkId) => {
   };
 };
 
+let parseCurrentUser json => {
+
+};
+
 let tee func output => {
   func (output);
   output
@@ -104,6 +108,8 @@ let parseNewUser responseText => {
     | None => parseNormalResp json
   };
 };
+
+let parseCurrentUser responseText => parseNewUser responseText; 
 
 let registerNewUser registerFunc jsonData => {
   open Js.Promise;
