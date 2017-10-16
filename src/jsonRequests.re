@@ -90,10 +90,6 @@ let hasErrors (checkId) => {
   };
 };
 
-let parseCurrentUser json => {
-
-};
-
 let tee func output => {
   func (output);
   output

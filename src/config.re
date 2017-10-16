@@ -33,5 +33,3 @@ let mapUrl url => {
     | Tags => "/tags"
   };
 };
-
-let getUrl endpoint => {};
