@@ -42,7 +42,7 @@ let parseUser json => {
 };
 
 let parseEmptyError _json => {
-  Json.Decode.{
+  {
     email: None,
     password: None,
     username: None
@@ -50,7 +50,7 @@ let parseEmptyError _json => {
 };
 
 let parseEmptyDefaultError () => {
-  Json.Decode.{
+  {
     id: 0,
     email: "",
     createdAt: "",
@@ -100,12 +100,41 @@ let parseNewUser responseText => {
 
   let possibleErrors = Json.Decode.(json |> optional (field "errors" parseErrors));
   switch possibleErrors {
-    | Some errors => parseErrorResp errors
+    | Some errors => {
+      Js.log errors;
+      parseErrorResp errors
+    }
     | None => parseNormalResp json
   };
 };
 
-let parseCurrentUser responseText => parseNewUser responseText; 
+type responseType =
+  | Error Js.Json.t
+  | User Js.Json.t;
+
+let getUserGraph responseText => {
+  let user = responseText
+    |> Js.Json.parseExn
+    |> Js.Json.decodeObject
+    |> Js.Option.andThen ((fun prop => Js.Dict.get prop "user") [@bs]);
+
+  switch user {
+    | Some json => json
+    | None => Js.Json.parseExn {j|{}|j}
+  };
+};
+
+let parseCurrentUser responseText => {
+  let possibleErrors = responseText
+                        |> Js.Json.parseExn
+                        |> Js.Json.decodeObject
+                        |> Js.Option.andThen ((fun p => Js.Dict.get p "errors") [@bs]);
+
+  switch possibleErrors {
+    | Some errors => Error errors
+    | None => User (getUserGraph responseText)
+  };
+};
 
 let registerNewUser registerFunc jsonData => {
   open Js.Promise;
@@ -121,7 +150,7 @@ let registerNewUser registerFunc jsonData => {
 
 let sendRequest jsonData actionFunc url => {
   open Js.Promise;
-  
+
   let request = makeInit Post None (Some jsonData);
 
   {

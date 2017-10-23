@@ -16,6 +16,8 @@ let succesWithJson = {j|{
   }
 }|j};
 
+let loginErrorResponse = {j|{"errors":{"email or password":["is invalid"]}}|j};
+
 let () =
   describe "New user request"
     ExpectJs.(fun () => {
@@ -61,4 +63,35 @@ let () =
         |> expect
         |> toBe "bryant"
       });
+
+      test "should return error with wrong username password" (fun () => {
+        let result = JsonRequests.parseCurrentUser loginErrorResponse;
+        /* convert errors to a dictionary */
+        let convertToDict json => {
+          let errorJson = Js.Json.decodeObject json;
+          switch errorJson {
+            | Some errorList => {
+              let errorKeys = Js.Dict.keys errorList;
+              let errorValues = Js.Dict.values errorList;
+              let errorArray = Array.mapi (fun acc errorField => {
+                let validationError = Array.get errorValues acc;
+                let frontCaps = String.capitalize errorField;
+                {j|$frontCaps $validationError|j}
+              }) errorKeys;
+
+              Js.log errorArray;
+            }
+            | None => Js.log "I got nothing"
+          };
+        };
+
+        switch result {
+          | Error errorList => {
+              convertToDict errorList |> ignore;
+              Js.log errorList
+          }
+          | User user => Js.log user
+        };
+        expect true |> toBe true;
+      })
     });

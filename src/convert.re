@@ -8,7 +8,7 @@ let formatError fieldName value => {
   };
 };
 
-let toErrorListFromResponse errorGraph => {
+let toErrorListFromResponse errorGraph => { 
   switch errorGraph.errors {
     | Some errors => {
         (formatError "Email" errors.email |> Array.to_list) @
