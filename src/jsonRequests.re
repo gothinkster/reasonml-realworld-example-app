@@ -41,11 +41,17 @@ let parseUser json => {
   };
 };
 
-let parseEmptyError _json => {
-  {
-    email: None,
-    password: None,
-    username: None
+let parseNormalResp json => {
+  { user: Json.Decode.(json |> field "user" parseUser),
+    errors: None
+  };
+};
+
+let parseErrors json => {
+  Some Json.Decode.{
+    email: json |> optional (field "email" (array string)),
+    password: json |> optional (field "password" (array string)),
+    username: json |> optional (field "username" (array string))
   };
 };
 
@@ -60,21 +66,7 @@ let parseEmptyDefaultError () => {
     image: None,
     token: ""
   };
-};
-
-let parseNormalResp json => {
-  { user: Json.Decode.(json |> field "user" parseUser),
-    errors: None
-  };
-};
-
-let parseErrors json => {
-  Some Json.Decode.{
-    email: json |> optional (field "email" (array string)),
-    password: json |> optional (field "password" (array string)),
-    username: json |> optional (field "username" (array string))
-  };
-};
+}; 
 
 let parseErrorResp errors => {
   {
