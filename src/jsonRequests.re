@@ -117,15 +117,7 @@ let getUserGraph responseText => {
 };
 
 let parseCurrentUser responseText => {
-  let possibleErrors = responseText
-                        |> Js.Json.parseExn
-                        |> Js.Json.decodeObject
-                        |> Js.Option.andThen ((fun p => Js.Dict.get p "errors") [@bs]);
-
-  switch possibleErrors {
-    | Some errors => Error errors
-    | None => User (getUserGraph responseText)
-  };
+  []
 };
 
 let registerNewUser registerFunc jsonData => {

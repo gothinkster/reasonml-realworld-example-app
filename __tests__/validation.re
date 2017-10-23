@@ -64,6 +64,11 @@ let () =
         |> toBe "bryant"
       });
 
+      test "should parse user" (fun() => {
+        let result = JsonRequests.parseCurrentUser loginErrorResponse;
+        expect (List.length result) |> toBeGreaterThan 0        
+      });
+
       test "should return error with wrong username password" (fun () => {
         let result = JsonRequests.parseCurrentUser loginErrorResponse;
         /* convert errors to a dictionary */
@@ -84,14 +89,7 @@ let () =
             | None => Js.log "I got nothing"
           };
         };
-
-        switch result {
-          | Error errorList => {
-              convertToDict errorList |> ignore;
-              Js.log errorList
-          }
-          | User user => Js.log user
-        };
+               
         expect true |> toBe true;
       })
     });
