@@ -44,9 +44,18 @@ let loginUser route {ReasonReact.state: state, reduce} event => {
   JsonRequests.authenticateUser (fun _status jsonPayload => {
     jsonPayload
     |> Js.Promise.then_ (fun json => {
-      let newUser = JsonRequests.parseCurrentUser json;
-
-      let updatedState = {...state, hasValidationError: false};
+      let newUser = JsonRequests.checkForErrors json;
+      
+      let updatedState = 
+        switch newUser {
+          | Some errors => {...state, hasValidationError: true, errorList: errors |> JsonRequests.convertErrorsToList} 
+          | None => {
+            /* Parse user from request to save the token */
+            DirectorRe.setRoute route "/home";
+            {...state, hasValidationError: false}
+          }
+        };  
+      /* {...state, hasValidationError: false}; */
         /* switch newUser.errors {
           | Some _user => {...state, hasValidationError: true, errorList: newUser |> Convert.toErrorListFromResponse} 
           | None  => {

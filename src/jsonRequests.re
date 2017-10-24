@@ -92,10 +92,7 @@ let parseNewUser responseText => {
 
   let possibleErrors = Json.Decode.(json |> optional (field "errors" parseErrors));
   switch possibleErrors {
-    | Some errors => {
-      Js.log errors;
-      parseErrorResp errors
-    }
+    | Some errors => parseErrorResp errors
     | None => parseNormalResp json
   };
 };
@@ -116,8 +113,27 @@ let getUserGraph responseText => {
   };
 };
 
-let parseCurrentUser responseText => {
-  []
+let checkForErrors responseText => 
+  responseText
+    |> Js.Json.parseExn
+    |> Js.Json.decodeObject
+    |> Js.Option.andThen ((fun prop => Js.Dict.get prop "errors") [@bs]);
+
+let convertErrorsToList errorJson => {
+  let decodedJson = Js.Json.decodeObject errorJson;
+  switch decodedJson {
+    | Some errorList => {
+      let errorKeys = Js.Dict.keys errorList;
+      let errorValues = Js.Dict.values errorList;
+       
+      Array.mapi (fun acc errorField => {
+        let validationError = Array.get errorValues acc;
+        let frontCaps = String.capitalize errorField;
+        {j|$frontCaps $validationError|j}
+      }) errorKeys |> Array.to_list;
+    }
+    | None => []
+  };
 };
 
 let registerNewUser registerFunc jsonData => {
