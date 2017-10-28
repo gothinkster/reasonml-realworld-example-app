@@ -4,18 +4,18 @@ type user = {
   createdAt: string,
   updatedAt: string,
   username: string,
-  bio: option string,
-  image: option string,
+  bio: option(string),
+  image: option(string),
   token: string
 };
 
 type errorDetails = {
-  email: option (array string),
-  password: option (array string),
-  username: option (array string)
+  email: option(array(string)),
+  password: option(array(string)),
+  username: option(array(string))
 };
 
 type registeredUser = {
-  errors: option errorDetails,
-  user: user
+  errors: option(errorDetails),
+  user
 };

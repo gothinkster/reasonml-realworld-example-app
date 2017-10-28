@@ -1,4 +1,5 @@
 open Jest;
+
 open JsonRequests;
 
 let errorsJson = {j|{"errors":{"email":["is invalid"],"password":["is too short (minimum is 8 characters)"]}}|j};
@@ -19,57 +20,63 @@ let succesWithJson = {j|{
 let loginErrorResponse = {j|{"errors":{"email or password":["is invalid"]}}|j};
 
 let () =
-  describe "New user request"
-    ExpectJs.(fun () => {
-      test "should respond with a decoded error" (fun () => {
-        let newUser = parseNewUser errorsJson;
-
-        switch newUser.errors {
-          | Some _response => expect true |> toBeTruthy
-          | None => expect (false) |> toBeTruthy
-        };
-      });
-
-      test "should have an invalid email" (fun () => {
-        let newUser = parseNewUser errorsJson;
-
-        switch newUser.errors {
-          | Some errorList =>
-            switch errorList.email {
-            | Some error => expect (Array.get error 0) |> toBe "is invalid"
-            | None => fail "this has failed"
+  describe(
+    "New user request",
+    ExpectJs.(
+      () => {
+        test(
+          "should respond with a decoded error",
+          () => {
+            let newUser = parseNewUser(errorsJson);
+            switch newUser.errors {
+            | Some(_response) => expect(true) |> toBeTruthy
+            | None => expect(false) |> toBeTruthy
             }
-          | None => fail "this has failed"
-        };
-      });
-
-      test "should have an error where the password is too short" (fun () => {
-        let newUser = parseNewUser errorsJson;
-
-        switch newUser.errors {
-          | Some errorList =>
-            switch errorList.password {
-              | Some password => expect (Array.get password 0) |> toBe "is too short (minimum is 8 characters)"
-              | None => fail "Failed to check password validation"
-            };
-          | None => fail "Failed to return any errors"
-        };
-      });
-
-      test "should have the correct username" (fun () => {
-        open Models;
-
-        (parseNewUser succesWithJson).user.username
-        |> expect
-        |> toBe "bryant"
-      });
-
-      test "should return an error graph" (fun() => {
-        let result = JsonRequests.checkForErrors loginErrorResponse;
-        switch result {
-          | Some _errorList => expect true |> toBe true
-          | None => expect false |> toBe true
-        };
-      });
-      
-    });
+          }
+        );
+        test(
+          "should have an invalid email",
+          () => {
+            let newUser = parseNewUser(errorsJson);
+            switch newUser.errors {
+            | Some(errorList) =>
+              switch errorList.email {
+              | Some(error) => expect(error[0]) |> toBe("is invalid")
+              | None => fail("this has failed")
+              }
+            | None => fail("this has failed")
+            }
+          }
+        );
+        test(
+          "should have an error where the password is too short",
+          () => {
+            let newUser = parseNewUser(errorsJson);
+            switch newUser.errors {
+            | Some(errorList) =>
+              switch errorList.password {
+              | Some(password) =>
+                expect(password[0]) |> toBe("is too short (minimum is 8 characters)")
+              | None => fail("Failed to check password validation")
+              }
+            | None => fail("Failed to return any errors")
+            }
+          }
+        );
+        test(
+          "should have the correct username",
+          () => Models.(parseNewUser(succesWithJson).user.username |> expect |> toBe("bryant"))
+        );
+        test(
+          "should return an error graph",
+          () => {
+            let result = JsonRequests.checkForErrors(loginErrorResponse);
+            switch result {
+            | Some(_errorList) => expect(true) |> toBe(true)
+            | None => expect(false) |> toBe(true)
+            }
+          }
+        )
+      }
+    )
+  );

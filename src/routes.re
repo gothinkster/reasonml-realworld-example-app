@@ -1,4 +1,4 @@
-type routes = 
+type routes =
   | Home
   | Register
   | Login

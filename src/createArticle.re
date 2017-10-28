@@ -1,37 +1,48 @@
-let component = ReasonReact.statelessComponent "CreateArticle";
+let component = ReasonReact.statelessComponent("CreateArticle");
+
 let show = ReasonReact.stringToElement;
 
-let make _children => {
+let make = (_children) => {
   ...component,
-  render: fun _self => {
+  render: (_self) =>
     <div className="editor-page">
       <div className="container page">
         <div className="row">
-    
           <div className="col-md-10 offset-md-1 col-xs-12">
             <form>
               <fieldset>
                 <fieldset className="form-group">
-                    <input _type="text" className="form-control form-control-lg" placeholder="Article Title" />
+                  <input
+                    _type="text"
+                    className="form-control form-control-lg"
+                    placeholder="Article Title"
+                  />
                 </fieldset>
                 <fieldset className="form-group">
-                    <input _type="text" className="form-control" placeholder="What's this article about?" />
+                  <input
+                    _type="text"
+                    className="form-control"
+                    placeholder="What's this article about?"
+                  />
                 </fieldset>
                 <fieldset className="form-group">
-                    <textarea className="form-control" rows=8 placeholder="Write your article (in markdown)" /> 
+                  <textarea
+                    className="form-control"
+                    rows=8
+                    placeholder="Write your article (in markdown)"
+                  />
                 </fieldset>
                 <fieldset className="form-group">
-                    <input _type="text" className="form-control" placeholder="Enter tags"/> <div className="tag-list" /> 
+                  <input _type="text" className="form-control" placeholder="Enter tags" />
+                  <div className="tag-list" />
                 </fieldset>
                 <button className="btn btn-lg pull-xs-right btn-primary" _type="button">
-                    (show "Publish Article")
+                  (show("Publish Article"))
                 </button>
               </fieldset>
             </form>
           </div>
-    
         </div>
       </div>
     </div>
-  }
 };
