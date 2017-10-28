@@ -50,7 +50,7 @@ let loginUser route event {ReasonReact.state: state, reduce} => {
         switch newUser {
           | Some errors => {...state, hasValidationError: true, errorList: errors |> JsonRequests.convertErrorsToList} 
           | None => {
-            /* Parse user from request to save the token */
+            /* TODO: Parse user from request to save the token */
             DirectorRe.setRoute route "/home";
             {...state, hasValidationError: false}
           }
@@ -71,12 +71,8 @@ let make ::router _children => {
     switch action {
       | EmailUpdate value => ReasonReact.Update {...state, email: value}
       | PasswordUpdate value => ReasonReact.Update {...state, password: value}
-      | Login (hasError, errorList) => {
-        Js.log {j|Reducer call with error list: $errorList|j};
-        ReasonReact.Update {...state, hasValidationError: hasError, errorList: errorList }}
-      | LoginPending => {
-        Js.log "getting set to pending";
-        ReasonReact.NoUpdate}
+      | Login (hasError, errorList) => ReasonReact.Update {...state, hasValidationError: hasError, errorList: errorList }
+      | LoginPending => ReasonReact.NoUpdate
   }},
   render: fun self => {
     let {ReasonReact.state: state, reduce} = self;
