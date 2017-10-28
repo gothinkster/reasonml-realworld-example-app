@@ -156,7 +156,7 @@ let sendRequest jsonData actionFunc url => {
   {
     open Bs_fetch;
     fetchWithInit (apiUrlBase ^ (mapUrl url)) request
-    |> then_ (fun response => actionFunc (Response.status response) (Response.text response) |> resolve);
+    |> then_ (fun response =>  actionFunc (Response.status response) (Response.text response) |> resolve);
   }
 };
 
