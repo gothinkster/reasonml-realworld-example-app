@@ -50,11 +50,13 @@ let loginUser route event {ReasonReact.state: state, reduce} => {
         switch newUser {
           | Some errors => {...state, hasValidationError: true, errorList: errors |> JsonRequests.convertErrorsToList} 
           | None => {
-            /* TODO: Parse user from request to save the token */
+            (JsonRequests.parseNewUser json).user.token |> Effects.saveTokenToStorage;
             DirectorRe.setRoute route "/home";
             {...state, hasValidationError: false}
           }
         };  
+
+      /* TODO: Create a reducer to do nothing with succesful login so the state doesn't try to update */
       reduce (fun _payload => Login (updatedState.hasValidationError, updatedState.errorList)) ()
       |> Js.Promise.resolve })
   };
