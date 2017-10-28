@@ -19,5 +19,3 @@ type newRegisteredUser = {
   errors: option errorDetails,
   user: option user,
 };
-
-let checkScope = 10;
