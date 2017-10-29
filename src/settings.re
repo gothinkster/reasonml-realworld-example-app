@@ -10,6 +10,10 @@ type state = {
 
 type action = 
   | SettingsUpdated;
+
+let updateSettings = (event, {ReasonReact.state, reduce}) => {
+  ReactEventRe.Mouse.preventDefault(event);
+};
   
 let component = ReasonReact.reducerComponent("Settings");
 let make = (_children) => {
@@ -70,7 +74,7 @@ let make = (_children) => {
                     placeholder="Password"
                   />
                 </fieldset>
-                <button className="btn btn-lg btn-primary pull-xs-right">
+                <button className="btn btn-lg btn-primary pull-xs-right" onClick=(self.handle(updateSettings))>
                   (show("Update Settings"))
                 </button>
               </fieldset>
