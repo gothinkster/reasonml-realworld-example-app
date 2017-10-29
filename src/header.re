@@ -7,12 +7,10 @@ let navigateTo = (router, event, routeName) => {
   DirectorRe.setRoute(router, routeName)
 };
 
-let goToRegistration = (router, event) => {
-  ReactEventRe.Mouse.preventDefault(event);
-  DirectorRe.setRoute(router, "/register")
-};
-
+let goToRegistration = (router, routeName, event) => navigateTo(router, event, routeName);
 let goToHome = (router, routeName, event) => navigateTo(router, event, routeName);
+let goToSettings = (router, routeName, event) => navigateTo(router, event, routeName);
+let goToCreateArticle = (router, routeName, event) => navigateTo(router, event, routeName);
 
 let make = (~router, _children) => {
   ...component, /* spread the template's other defaults into here  */
@@ -28,19 +26,19 @@ let make = (~router, _children) => {
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#/article/create">
+              <a className="nav-link" href="#" onClick=(goToCreateArticle(router, "/article/create"))>
                 <i className="ion-compose" />
                 (show(" New Post"))
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#/settings">
+              <a className="nav-link" href="#" onClick=(goToSettings(router, "/settings"))>
                 <i className="ion-gear-a" />
                 (show(" Settings"))
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#" onClick=(goToRegistration(router))>
+              <a className="nav-link" href="#" onClick=(goToRegistration(router, "/register"))>
                 (show("Sign up"))
               </a>
             </li>
