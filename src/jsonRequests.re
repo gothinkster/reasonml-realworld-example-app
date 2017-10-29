@@ -151,7 +151,7 @@ let sendRequest = (requestMethod, token, jsonData, actionFunc, url) => {
 };
 
 let authenticateUser = (loginFunc, jsonData) =>
-  sendRequest(Post, None, jsonData, loginFunc, Config.Authenticate)
+  sendRequest(Post, None, jsonData, loginFunc, Config.Authenticate);
 
 let updateUser = (updateUserFunc, jsonData, token) => 
-  sendRequest(Put, token, jsonData, updateUserFunc, Config.UpdateUser)
+  sendRequest(Put, token, jsonData, updateUserFunc, Config.UpdateUser);

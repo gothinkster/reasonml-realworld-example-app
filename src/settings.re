@@ -11,8 +11,21 @@ type state = {
 type action = 
   | SettingsUpdated;
 
+module Encode = {
+  let userSettings = (settings: state) => {
+    Json.Encode.([
+      ("email", string(settings.email)), 
+      ("password", string(settings.password)),
+      ("image", string(settings.image)),
+      ("username", string(settings.name)),
+      ("bio", string(settings.bio))
+    ]);
+  };
+};
+
 let updateSettings = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
+
 };
   
 let component = ReasonReact.reducerComponent("Settings");
