@@ -62,10 +62,8 @@ let loginUser = (route, event, {ReasonReact.state, reduce}) => {
                {...state, hasValidationError: false}
              };
            /* TODO: Create a reducer to do nothing with succesful login so the state doesn't try to update */
-           reduce(
-             (_payload) => Login((updatedState.hasValidationError, updatedState.errorList)),
-             ()
-           )
+           let callLoginReducer = (_payload) => Login((updatedState.hasValidationError, updatedState.errorList));
+           reduce(callLoginReducer ,())
            |> Js.Promise.resolve
          }
        );
@@ -82,8 +80,7 @@ let make = (~router, _children) => {
     switch action {
     | EmailUpdate(value) => ReasonReact.Update({...state, email: value})
     | PasswordUpdate(value) => ReasonReact.Update({...state, password: value})
-    | Login((hasError, errorList)) =>
-      ReasonReact.Update({...state, hasValidationError: hasError, errorList})
+    | Login((hasError, errorList)) => ReasonReact.Update({...state, hasValidationError: hasError, errorList})
     | LoginPending => ReasonReact.NoUpdate
     },
   render: (self) => {

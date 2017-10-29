@@ -1,15 +1,33 @@
-let component = ReasonReact.statelessComponent("Home");
-
 let show = ReasonReact.stringToElement;
 
 let profile_image = {|http://i.imgur.com/Qr71crq.jpg|};
 
 let second_image = {|"http://i.imgur.com/N4VcUeJ.jpg"|};
 
+type action =
+  | TagsFetched(list(string));
+
+type state = {tags: list(string)};
+
+let component = ReasonReact.reducerComponent("Home");
+
 let make = (_children) => {
   ...component,
-  render: (_self) =>
+  initialState: () => {tags: []},
+  reducer: (action, _state) =>
+    switch action {
+    | TagsFetched(_tagList) => ReasonReact.NoUpdate
+    },
+  didMount: (self) => {
+    Js.log("[Info] Home mounted before fetching tags.");
+    
+    self.reduce((_) => TagsFetched([]), ());
+    ReasonReact.NoUpdate
+  },
+  render: (self) => {
+    let {ReasonReact.state} = self;
     <div className="home-page">
+      (ReasonReact.stringToElement(string_of_int(List.length(state.tags))))
       <div className="banner">
         <div className="container">
           <h1 className="logo-font"> (show("conduit")) </h1>
@@ -86,4 +104,5 @@ let make = (_children) => {
         </div>
       </div>
     </div>
+  }
 };
