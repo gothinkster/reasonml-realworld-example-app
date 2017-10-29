@@ -2,6 +2,8 @@ let component = ReasonReact.statelessComponent("Header");
 
 let show = ReasonReact.stringToElement;
 
+let pointerStyle = () => ReactDOMRe.Style.make(~cursor="pointer", ());
+
 let navigateTo = (router, event, routeName) => {
   ReactEventRe.Mouse.preventDefault(event);
   DirectorRe.setRoute(router, routeName)
@@ -21,24 +23,24 @@ let make = (~router, _children) => {
           <a className="navbar-brand" href="index.html"> (show("conduit")) </a>
           <ul className="nav navbar-nav pull-xs-right">
             <li className="nav-item">
-              <a className="nav-link active" href="#/" onClick=(goToHome(router, "/home"))>
+              <a className="nav-link active" style=(pointerStyle()) onClick=(goToHome(router, "/home"))>
                 (show("Home"))
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#" onClick=(goToCreateArticle(router, "/article/create"))>
+              <a className="nav-link" style=(pointerStyle()) onClick=(goToCreateArticle(router, "/article/create"))>
                 <i className="ion-compose" />
                 (show(" New Post"))
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#" onClick=(goToSettings(router, "/settings"))>
+              <a className="nav-link" style=(pointerStyle()) onClick=(goToSettings(router, "/settings"))>
                 <i className="ion-gear-a" />
                 (show(" Settings"))
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#" onClick=(goToRegistration(router, "/register"))>
+              <a className="nav-link" style=(pointerStyle()) onClick=(goToRegistration(router, "/register"))>
                 (show("Sign up"))
               </a>
             </li>
