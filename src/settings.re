@@ -20,7 +20,7 @@ let make = (_children) => {
     | SettingsUpdated => ReasonReact.NoUpdate
     },
   didMount: (_self) => {
-    Js.log("[Info] Home mounted before fetching tags.");
+    Js.log("[Info] Mounted before fetching settings.");
     /* self.reduce((_) => TagsFetched([]), ()); */
     ReasonReact.NoUpdate
   },
@@ -37,6 +37,7 @@ let make = (_children) => {
                     className="form-control"
                     _type="text"
                     placeholder="URL of profile picture"
+                    value=(self.state.image)
                   />
                 </fieldset>
                 <fieldset className="form-group">
@@ -44,6 +45,7 @@ let make = (_children) => {
                     className="form-control form-control-lg"
                     _type="text"
                     placeholder="Your Name"
+                    value=(self.state.name)
                   />
                 </fieldset>
                 <fieldset className="form-group">
