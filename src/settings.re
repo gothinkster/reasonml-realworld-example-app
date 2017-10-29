@@ -25,7 +25,7 @@ module Encode = {
 
 let updateSettings = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
-
+  Js.log("Should send request to server to update settings.");
 };
   
 let component = ReasonReact.reducerComponent("Settings");
@@ -78,6 +78,7 @@ let make = (_children) => {
                     className="form-control form-control-lg"
                     _type="text"
                     placeholder="Email"
+                    value=(self.state.email)
                   />
                 </fieldset>
                 <fieldset className="form-group">
@@ -85,6 +86,7 @@ let make = (_children) => {
                     className="form-control form-control-lg"
                     _type="password"
                     placeholder="Password"
+                    value=(self.state.password)
                   />
                 </fieldset>
                 <button className="btn btn-lg btn-primary pull-xs-right" onClick=(self.handle(updateSettings))>
