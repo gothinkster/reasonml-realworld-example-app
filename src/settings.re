@@ -1,10 +1,30 @@
-let component = ReasonReact.statelessComponent("Settings");
-
 let show = ReasonReact.stringToElement;
 
+type state = {
+  image: string,
+  name: string,
+  bio: string,
+  email: string,
+  password: string
+};
+
+type action = 
+  | SettingsUpdated;
+  
+let component = ReasonReact.reducerComponent("Settings");
 let make = (_children) => {
   ...component,
-  render: (_self) =>
+  initialState: () => {image:"", name: "", bio: "", email: "", password:""},
+  reducer: (action, _state) =>
+    switch action {
+    | SettingsUpdated => ReasonReact.NoUpdate
+    },
+  didMount: (_self) => {
+    Js.log("[Info] Home mounted before fetching tags.");
+    /* self.reduce((_) => TagsFetched([]), ()); */
+    ReasonReact.NoUpdate
+  },
+  render: (self) =>
     <div className="settings-page">
       <div className="container page">
         <div className="row">
@@ -31,6 +51,7 @@ let make = (_children) => {
                     className="form-control form-control-lg"
                     rows=8
                     placeholder="Short bio about you"
+                    value=(self.state.bio)
                   />
                 </fieldset>
                 <fieldset className="form-group">
