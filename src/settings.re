@@ -9,6 +9,7 @@ type state = {
 };
 
 type action = 
+  | SettingsFetched
   | SettingsUpdated;
 
 module Encode = {
@@ -35,10 +36,12 @@ let make = (_children) => {
   reducer: (action, _state) =>
     switch action {
     | SettingsUpdated => ReasonReact.NoUpdate
+    | SettingsFetched => ReasonReact.NoUpdate
     },
   didMount: (_self) => {
     Js.log("[Info] Mounted before fetching settings.");
     /* self.reduce((_) => TagsFetched([]), ()); */
+    let reduceUser = (_status, jsonPayload) => {};
     ReasonReact.NoUpdate
   },
   render: (self) =>
