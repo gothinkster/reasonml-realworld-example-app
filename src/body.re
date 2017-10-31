@@ -11,7 +11,7 @@ let make = (~route, ~router, _children) => {
       | Routes.Home => <Home />
       | Routes.Register => <Register router />
       | Routes.Login => <Login router />
-      | Routes.Settings => <Settings />
+      | Routes.Settings => <Settings router />
       | Routes.Article => <Article />
       | Routes.CreateArticle => <CreateArticle />
       | Routes.EditArticle => <Article />

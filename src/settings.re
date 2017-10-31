@@ -8,18 +8,24 @@ type state = {
   password: string
 };
 
-type action = 
+type action =
   | SettingsFetched
   | SettingsUpdated;
 
 module Encode = {
   let userSettings = (settings: state) => {
     Json.Encode.([
-      ("email", string(settings.email)), 
+      ("email", string(settings.email)),
       ("password", string(settings.password)),
       ("image", string(settings.image)),
       ("username", string(settings.name)),
-      ("bio", string(settings.bio))
+      ("bio", string(settings.bio))      
+    ]);
+  };
+
+  let token = (currentUser) => {
+    Json.Encode.([
+      ("token", string(currentUser))
     ]);
   };
 };
@@ -28,9 +34,9 @@ let updateSettings = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
   Js.log("Should send request to server to update settings.");
 };
-  
+
 let component = ReasonReact.reducerComponent("Settings");
-let make = (_children) => {
+let make = (~router, _children) => {
   ...component,
   initialState: () => {image:"", name: "", bio: "", email: "", password:""},
   reducer: (action, _state) =>
@@ -39,9 +45,23 @@ let make = (_children) => {
     | SettingsFetched => ReasonReact.NoUpdate
     },
   didMount: (_self) => {
-    Js.log("[Info] Mounted before fetching settings.");
     /* self.reduce((_) => TagsFetched([]), ()); */
-    let reduceUser = (_status, jsonPayload) => {};
+    let reduceUser = (status, jsonPayload) => {
+      let displayResult = (result) => {
+        if (result == "401"){
+          DirectorRe.setRoute(router, "/login");
+        };
+
+        Js.log({j|Result: $status|j});
+        Js.log(result);
+        let usersToken = Encode.token(result);
+
+        result |> Js.Promise.resolve
+      };
+      jsonPayload |> Js.Promise.then_(displayResult)
+    };
+
+    JsonRequests.getCurrentUser(reduceUser, Effects.getTokenFromStorage()) |> ignore;
     ReasonReact.NoUpdate
   },
   render: (self) =>
