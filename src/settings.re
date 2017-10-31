@@ -9,7 +9,25 @@ type state = {
 };
 
 type action = 
+  | SettingsFetched
   | SettingsUpdated;
+
+module Encode = {
+  let userSettings = (settings: state) => {
+    Json.Encode.([
+      ("email", string(settings.email)), 
+      ("password", string(settings.password)),
+      ("image", string(settings.image)),
+      ("username", string(settings.name)),
+      ("bio", string(settings.bio))
+    ]);
+  };
+};
+
+let updateSettings = (event, {ReasonReact.state, reduce}) => {
+  ReactEventRe.Mouse.preventDefault(event);
+  Js.log("Should send request to server to update settings.");
+};
   
 let component = ReasonReact.reducerComponent("Settings");
 let make = (_children) => {
@@ -18,10 +36,12 @@ let make = (_children) => {
   reducer: (action, _state) =>
     switch action {
     | SettingsUpdated => ReasonReact.NoUpdate
+    | SettingsFetched => ReasonReact.NoUpdate
     },
   didMount: (_self) => {
     Js.log("[Info] Mounted before fetching settings.");
     /* self.reduce((_) => TagsFetched([]), ()); */
+    let reduceUser = (_status, jsonPayload) => {};
     ReasonReact.NoUpdate
   },
   render: (self) =>
@@ -61,6 +81,7 @@ let make = (_children) => {
                     className="form-control form-control-lg"
                     _type="text"
                     placeholder="Email"
+                    value=(self.state.email)
                   />
                 </fieldset>
                 <fieldset className="form-group">
@@ -68,9 +89,10 @@ let make = (_children) => {
                     className="form-control form-control-lg"
                     _type="password"
                     placeholder="Password"
+                    value=(self.state.password)
                   />
                 </fieldset>
-                <button className="btn btn-lg btn-primary pull-xs-right">
+                <button className="btn btn-lg btn-primary pull-xs-right" onClick=(self.handle(updateSettings))>
                   (show("Update Settings"))
                 </button>
               </fieldset>

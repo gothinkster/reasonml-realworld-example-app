@@ -139,9 +139,9 @@ let registerNewUser = (registerFunc, jsonData) => {
   )
 };
 
-let sendRequest = (jsonData, actionFunc, url) => {
+let sendRequest = (requestMethod, token, jsonData, actionFunc, url) => {
   open Js.Promise;
-  let request = makeInit(Post, None, Some(jsonData));
+  let request = makeInit(requestMethod, token, jsonData);
   Bs_fetch.(
     fetchWithInit(apiUrlBase ++ mapUrl(url), request)
     |> then_(
@@ -151,4 +151,10 @@ let sendRequest = (jsonData, actionFunc, url) => {
 };
 
 let authenticateUser = (loginFunc, jsonData) =>
-  sendRequest(jsonData, loginFunc, Config.Authenticate);
+  sendRequest(Post, None, Some(jsonData), loginFunc, Config.Authenticate);
+
+let updateUser = (updateUserFunc, jsonData, token) => 
+  sendRequest(Put, token, Some(jsonData), updateUserFunc, Config.UpdateUser);
+
+let getCurrentUser = (getUserFunc, token) => 
+  sendRequest(Get, token, None, getUserFunc, Config.CurrentUser);
