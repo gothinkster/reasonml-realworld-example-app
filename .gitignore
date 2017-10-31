@@ -27,3 +27,4 @@ node_modules/
 tasks.json
 lib/js/*
 npm-debug.log
+.bsb.lock
