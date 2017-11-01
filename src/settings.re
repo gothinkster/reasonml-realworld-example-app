@@ -9,7 +9,7 @@ type state = {
 };
 
 type action =
-  | SettingsFetched
+  | SettingsFetched(state)
   | SettingsUpdated;
 
 module Encode = {
@@ -19,7 +19,7 @@ module Encode = {
       ("password", string(settings.password)),
       ("image", string(settings.image)),
       ("username", string(settings.name)),
-      ("bio", string(settings.bio))      
+      ("bio", string(settings.bio))
     ]);
   };
 
@@ -35,31 +35,47 @@ let updateSettings = (event, {ReasonReact.state, reduce}) => {
   Js.log("Should send request to server to update settings.");
 };
 
+let getField  =
+  fun
+  | Some(field) => field
+  | None => "";
+
 let component = ReasonReact.reducerComponent("Settings");
 let make = (~router, _children) => {
   ...component,
   initialState: () => {image:"", name: "", bio: "", email: "", password:""},
-  reducer: (action, _state) =>
+  reducer: (action, state) =>
     switch action {
     | SettingsUpdated => ReasonReact.NoUpdate
-    | SettingsFetched => ReasonReact.NoUpdate
+    | SettingsFetched(updatedState) => ReasonReact.Update({...state, email: updatedState.email})
     },
-  didMount: (_self) => {
-    /* self.reduce((_) => TagsFetched([]), ()); */
-    let reduceUser = (status, jsonPayload) => {
-      let displayResult = (result) => {
-        if (result == "401"){
-          DirectorRe.setRoute(router, "/login");
-        };
+  didMount: (self) => {
+    let reduceCurrentUser = (_status, jsonPayload) => {
+      jsonPayload |> Js.Promise.then_((result) => {
+        let parsedUser = JsonRequests.parseNewUser(result);
 
-        Js.log({j|Result: $status|j});
-        Js.log(result);
-        let usersToken = Encode.token(result);
-
-        result |> Js.Promise.resolve
-      };
-      jsonPayload |> Js.Promise.then_(displayResult)
+        self.reduce((_) => SettingsFetched({
+          image: getField(parsedUser.user.image),
+          name: parsedUser.user.username,
+          bio: getField(parsedUser.user.bio),
+          email: parsedUser.user.email,
+          password: "" }), ());
+        parsedUser.user |> Js.Promise.resolve
+      })
     };
+
+    let displayResult = (result) => {
+      if (result == "401"){
+        DirectorRe.setRoute(router, "/login");
+      };
+
+      let usersToken = JsonRequests.getUserGraph(result) |> JsonRequests.parseUser;
+      JsonRequests.getCurrentUser(reduceCurrentUser, Some(usersToken.token)) |> ignore;
+
+      result |> Js.Promise.resolve
+    };
+
+    let reduceUser = (_status, jsonPayload) => jsonPayload |> Js.Promise.then_(displayResult);
 
     JsonRequests.getCurrentUser(reduceUser, Effects.getTokenFromStorage()) |> ignore;
     ReasonReact.NoUpdate
