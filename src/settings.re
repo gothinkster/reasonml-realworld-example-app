@@ -47,7 +47,12 @@ let make = (~router, _children) => {
   reducer: (action, state) =>
     switch action {
     | SettingsUpdated => ReasonReact.NoUpdate
-    | SettingsFetched(updatedState) => ReasonReact.Update({...state, email: updatedState.email})
+    | SettingsFetched(updatedState) => ReasonReact.Update({
+      ...state, 
+      email: updatedState.email, 
+      name: updatedState.name,
+      bio: updatedState.bio,
+      image: updatedState.image})
     },
   didMount: (self) => {
     let reduceCurrentUser = (_status, jsonPayload) => {
