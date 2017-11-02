@@ -12,15 +12,16 @@ type action =
   | SettingsFetched(state)
   | SettingsUpdated;
 
+
 module Encode = {
   let userSettings = (settings: state) => {
-    Json.Encode.([
+    Json.Encode.(object_([
       ("email", string(settings.email)),
       ("password", string(settings.password)),
       ("image", string(settings.image)),
       ("username", string(settings.name)),
       ("bio", string(settings.bio))
-    ]);
+    ]));
   };
 
   let token = (currentUser) => {
@@ -32,7 +33,8 @@ module Encode = {
 
 let updateSettings = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
-  Js.log("Should send request to server to update settings.");
+  let responseCatch = (_status, payload) => {};
+  JsonRequests.updateUser(responseCatch, Encode.userSettings(state) , Effects.getTokenFromStorage()) |> ignore
 };
 
 let getField  =
@@ -48,8 +50,8 @@ let make = (~router, _children) => {
     switch action {
     | SettingsUpdated => ReasonReact.NoUpdate
     | SettingsFetched(updatedState) => ReasonReact.Update({
-      ...state, 
-      email: updatedState.email, 
+      ...state,
+      email: updatedState.email,
       name: updatedState.name,
       bio: updatedState.bio,
       image: updatedState.image})
