@@ -9,9 +9,13 @@ type state = {
 };
 
 type action =
-  | SettingsFetched(state)
+  | UpdateEmail (string)
+  | UpdatePassword (string)
+  | UpdateBio (string)
+  | UpdateImage (string)
+  | UpdateName (string)
+  | SettingsFetched (state)
   | SettingsUpdated;
-
 
 module Encode = {
   let userSettings = (settings: state) => {
@@ -24,6 +28,9 @@ module Encode = {
     ]));
   };
 
+  let user = (settings: state) => 
+    Json.Encode.(object_([("user", userSettings(settings))]));
+
   let token = (currentUser) => {
     Json.Encode.([
       ("token", string(currentUser))
@@ -33,9 +40,23 @@ module Encode = {
 
 let updateSettings = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
-  let responseCatch = (_status, payload) => {};
-  JsonRequests.updateUser(responseCatch, Encode.userSettings(state) , Effects.getTokenFromStorage()) |> ignore
+  let responseCatch = (_status, payload) => {
+    payload |> Js.Promise.then_((result) => { Js.log(result); result |> Js.Promise.resolve }) |> ignore;
+    Js.log({j|Current status $_status|j})
+  };
+  JsonRequests.updateUser(responseCatch, Encode.user(state) , Effects.getTokenFromStorage()) |> ignore
 };
+
+let updateImage = (event) =>
+  UpdateImage(ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value);
+let updateName = (event) =>
+  UpdateName(ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value);
+let updateBio = (event) =>
+  UpdateBio(ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value);
+let updateEmail = (event) =>
+  UpdateEmail(ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value);
+let updatePassword = (event) =>
+  UpdatePassword(ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value);
 
 let getField  =
   fun
@@ -48,8 +69,13 @@ let make = (~router, _children) => {
   initialState: () => {image:"", name: "", bio: "", email: "", password:""},
   reducer: (action, state) =>
     switch action {
+    | UpdateEmail (email) => ReasonReact.Update({...state, email: email})
+    | UpdatePassword (password) => ReasonReact.Update({...state, password: password})
+    | UpdateBio (bio) => ReasonReact.Update({...state, bio: bio})
+    | UpdateImage (image) => ReasonReact.Update({...state, image: image})
+    | UpdateName (name) => ReasonReact.Update({...state, name: name})
     | SettingsUpdated => ReasonReact.NoUpdate
-    | SettingsFetched(updatedState) => ReasonReact.Update({
+    | SettingsFetched (updatedState) => ReasonReact.Update({
       ...state,
       email: updatedState.email,
       name: updatedState.name,
@@ -60,7 +86,8 @@ let make = (~router, _children) => {
     let reduceCurrentUser = (_status, jsonPayload) => {
       jsonPayload |> Js.Promise.then_((result) => {
         let parsedUser = JsonRequests.parseNewUser(result);
-
+        let displayBio = getField(parsedUser.user.bio);
+        Js.log({j|Result: $displayBio|j});
         self.reduce((_) => SettingsFetched({
           image: getField(parsedUser.user.image),
           name: parsedUser.user.username,
@@ -100,15 +127,17 @@ let make = (~router, _children) => {
                     className="form-control"
                     _type="text"
                     placeholder="URL of profile picture"
-                    value=(self.state.image)
+                    value=(self.state.image)      
+                    onChange=(self.reduce(updateImage))              
                   />
                 </fieldset>
                 <fieldset className="form-group">
-                  <input
+                  <input                    
                     className="form-control form-control-lg"
                     _type="text"
                     placeholder="Your Name"
                     value=(self.state.name)
+                    onChange=(self.reduce(updateName))
                   />
                 </fieldset>
                 <fieldset className="form-group">
@@ -117,6 +146,7 @@ let make = (~router, _children) => {
                     rows=8
                     placeholder="Short bio about you"
                     value=(self.state.bio)
+                    onChange=(self.reduce(updateBio))
                   />
                 </fieldset>
                 <fieldset className="form-group">
@@ -125,6 +155,7 @@ let make = (~router, _children) => {
                     _type="text"
                     placeholder="Email"
                     value=(self.state.email)
+                    onChange=(self.reduce(updateEmail))
                   />
                 </fieldset>
                 <fieldset className="form-group">
@@ -133,6 +164,7 @@ let make = (~router, _children) => {
                     _type="password"
                     placeholder="Password"
                     value=(self.state.password)
+                    onChange=(self.reduce(updatePassword))
                   />
                 </fieldset>
                 <button className="btn btn-lg btn-primary pull-xs-right" onClick=(self.handle(updateSettings))>

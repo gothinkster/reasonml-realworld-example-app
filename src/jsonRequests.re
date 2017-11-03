@@ -35,8 +35,8 @@ let parseUser = (json) =>
     createdAt: json |> field("createdAt", string),
     updatedAt: json |> field("updatedAt", string),
     username: json |> field("username", string),
-    bio: None,
-    image: None,
+    bio: json |> optional(field("bio",string)),
+    image: json |> optional(field("image",string)),
     token: json |> field("token", string)
   };
 
