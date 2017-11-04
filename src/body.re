@@ -15,6 +15,7 @@ let make = (~route, ~router, _children) => {
       | Routes.Article => <Article />
       | Routes.CreateArticle => <CreateArticle />
       | Routes.EditArticle => <Article />
+      | Routes.Profile => <Profile />
       };
     <div> <Header router /> <div> (route |> select_subpage) </div> <Footer /> </div>
   }

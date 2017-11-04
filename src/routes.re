@@ -4,5 +4,6 @@ type routes =
   | Login
   | Settings
   | Article
+  | Profile
   | CreateArticle
   | EditArticle;

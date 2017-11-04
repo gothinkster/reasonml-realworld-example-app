@@ -28,7 +28,7 @@ module Encode = {
     ]));
   };
 
-  let user = (settings: state) => 
+  let user = (settings: state) =>
     Json.Encode.(object_([("user", userSettings(settings))]));
 
   let token = (currentUser) => {
@@ -38,11 +38,11 @@ module Encode = {
   };
 };
 
-let updateSettings = (event, {ReasonReact.state, reduce}) => {
+let updateSettings = (router, event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
   let responseCatch = (_status, payload) => {
     payload |> Js.Promise.then_((result) => { Js.log(result); result |> Js.Promise.resolve }) |> ignore;
-    Js.log({j|Current status $_status|j})
+    DirectorRe.setRoute(router, "/profile");
   };
   JsonRequests.updateUser(responseCatch, Encode.user(state) , Effects.getTokenFromStorage()) |> ignore
 };
@@ -86,8 +86,7 @@ let make = (~router, _children) => {
     let reduceCurrentUser = (_status, jsonPayload) => {
       jsonPayload |> Js.Promise.then_((result) => {
         let parsedUser = JsonRequests.parseNewUser(result);
-        let displayBio = getField(parsedUser.user.bio);
-        Js.log({j|Result: $displayBio|j});
+
         self.reduce((_) => SettingsFetched({
           image: getField(parsedUser.user.image),
           name: parsedUser.user.username,
@@ -127,12 +126,12 @@ let make = (~router, _children) => {
                     className="form-control"
                     _type="text"
                     placeholder="URL of profile picture"
-                    value=(self.state.image)      
-                    onChange=(self.reduce(updateImage))              
+                    value=(self.state.image)
+                    onChange=(self.reduce(updateImage))
                   />
                 </fieldset>
                 <fieldset className="form-group">
-                  <input                    
+                  <input
                     className="form-control form-control-lg"
                     _type="text"
                     placeholder="Your Name"
@@ -167,7 +166,7 @@ let make = (~router, _children) => {
                     onChange=(self.reduce(updatePassword))
                   />
                 </fieldset>
-                <button className="btn btn-lg btn-primary pull-xs-right" onClick=(self.handle(updateSettings))>
+                <button className="btn btn-lg btn-primary pull-xs-right" onClick=(self.handle(updateSettings(router)))>
                   (show("Update Settings"))
                 </button>
               </fieldset>
