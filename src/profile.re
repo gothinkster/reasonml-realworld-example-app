@@ -1,7 +1,15 @@
-let component = ReasonReact.statelessComponent("Profile");
-
 let show = ReasonReact.stringToElement;
 
+type state = {
+  myArticles: list(string),
+  favoriteArticles: list(string)
+};
+
+type action =
+  | MyArticles(list(string))
+  | FavoriteArticle(list(string));
+
+let component = ReasonReact.statelessComponent("Profile");
 let make = (_children) => {
   ...component,
   render: (_self) =>
