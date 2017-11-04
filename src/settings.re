@@ -1,5 +1,5 @@
 let show = ReasonReact.stringToElement;
-
+  
 type state = {
   image: string,
   name: string,
