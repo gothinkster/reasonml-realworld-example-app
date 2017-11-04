@@ -41,8 +41,9 @@ module Encode = {
 let updateSettings = (router, event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
   let responseCatch = (_status, payload) => {
-    payload |> Js.Promise.then_((result) => { Js.log(result); result |> Js.Promise.resolve }) |> ignore;
     DirectorRe.setRoute(router, "/profile");
+    payload |> Js.Promise.then_((result) => { Js.log(result); result |> Js.Promise.resolve }) |> ignore;
+
   };
   JsonRequests.updateUser(responseCatch, Encode.user(state) , Effects.getTokenFromStorage()) |> ignore
 };
