@@ -139,11 +139,13 @@ let registerNewUser = (registerFunc, jsonData) => {
   )
 };
 
+let constructUrl = (url) => apiUrlBase ++ mapUrl(url); 
+
 let sendRequest = (requestMethod, token, jsonData, actionFunc, url) => {
   open Js.Promise;
   let request = makeInit(requestMethod, token, jsonData);
   Bs_fetch.(
-    fetchWithInit(apiUrlBase ++ mapUrl(url), request)
+    fetchWithInit(url, request)
     |> then_(
          (response) => actionFunc(Response.status(response), Response.text(response)) |> resolve
        )
@@ -151,10 +153,15 @@ let sendRequest = (requestMethod, token, jsonData, actionFunc, url) => {
 };
 
 let authenticateUser = (loginFunc, jsonData) =>
-  sendRequest(Post, None, Some(jsonData), loginFunc, Config.Authenticate);
+  sendRequest(Post, None, Some(jsonData), loginFunc, constructUrl(Config.Authenticate));
 
 let updateUser = (updateUserFunc, jsonData, token) => 
-  sendRequest(Put, token, Some(jsonData), updateUserFunc, Config.UpdateUser);
+  sendRequest(Put, token, Some(jsonData), updateUserFunc, constructUrl(Config.UpdateUser));
 
 let getCurrentUser = (getUserFunc, token) => 
-  sendRequest(Get, token, None, getUserFunc, Config.CurrentUser);
+  sendRequest(Get, token, None, getUserFunc, constructUrl(Config.CurrentUser));
+
+let getMyArticles = (getArticleFunc, name, token) => {
+  let urlAfterBase = mapUrl(Config.Articles) ++ "?author=" ++ name;
+  sendRequest(Get, token, None, getArticleFunc, urlAfterBase); 
+};
