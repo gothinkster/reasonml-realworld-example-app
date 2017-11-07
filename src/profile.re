@@ -1,12 +1,15 @@
 let show = ReasonReact.stringToElement;
 
+
 type state = {
   myArticles: list(string),
   favoriteArticles: list(string),
   showMyArticles: bool,
   showFavArticle: bool,
   username: string,
-  bio: string
+  bio: string,
+  isMyArticleDisplay: ReactDOMRe.style,
+  isFavArticleDisplay: ReactDOMRe.style
 };
 
 let initialState = {
@@ -15,7 +18,9 @@ let initialState = {
   showMyArticles: true, 
   showFavArticle: false, 
   username: "", 
-  bio: ""
+  bio: "",
+  isMyArticleDisplay: ReactDOMRe.Style.make(~display="block", ()),
+  isFavArticleDisplay: ReactDOMRe.Style.make(~display="none", ())
 };
 
 type action =
@@ -25,13 +30,22 @@ type action =
 
 let clickMyArticles = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
+  Js.log("Articles were clicked.");
+  /* This will be in the promise */
+  reduce((_) => MyArticles([]),());
+
   reduce((_) => PendingArticle, ())
 };
 
 let clickMyFavorites = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
-  PendingArticle
+  /* This will be in the promise */
+  reduce((_) => FavoriteArticle([]),());
+
+  reduce((_) => PendingArticle, ()) 
 };
+
+/* let displayArticles = () =>  */
 
 let component = ReasonReact.reducerComponent("Profile");
 let make = (_children) => {
@@ -39,8 +53,16 @@ let make = (_children) => {
   initialState: () => initialState,
   reducer: (action, state) =>
     switch action {
-    | MyArticles(_articleList) => ReasonReact.NoUpdate
-    | FavoriteArticle(_articleList) => ReasonReact.NoUpdate
+    | MyArticles(_articleList) => ReasonReact.Update({
+      ...state, 
+      isMyArticleDisplay: ReactDOMRe.Style.make(~display ="block",()),
+      isFavArticleDisplay: ReactDOMRe.Style.make(~display="none", ())
+    })
+    | FavoriteArticle(_articleList) => ReasonReact.Update({
+      ...state,
+      isMyArticleDisplay: ReactDOMRe.Style.make(~display="none", ()),
+      isFavArticleDisplay: ReactDOMRe.Style.make(~display="block", ())
+    })
     | PendingArticle => ReasonReact.NoUpdate
     },
   render: (self) => {
@@ -71,14 +93,14 @@ let make = (_children) => {
             <div className="articles-toggle">
               <ul className="nav nav-pills outline-active">
                 <li className="nav-item">
-                  <a className="nav-link active" href="" onClick=(self.handle(clickMyArticles))> (show("My Articles")) </a>
+                  <a className="nav-link active" href="#" onClick=(self.handle(clickMyArticles))> (show("My Articles")) </a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href=""> (show("Favorited Articles")) </a>
+                  <a className="nav-link" href="#" onClick=(self.handle(clickMyFavorites))> (show("Favorited Articles")) </a>
                 </li>
               </ul>
             </div>
-            <div className="article-preview">
+            <div className="article-preview" style=(state.isMyArticleDisplay)>
               <div className="article-meta">
                 <a href="#/home"> <img src={|http://i.imgur.com/Qr71crq.jpg|} /> </a>
                 <div className="info">
@@ -96,7 +118,7 @@ let make = (_children) => {
                 <span> (show("Read more...")) </span>
               </a>
             </div>
-            <div className="article-preview">
+            <div className="article-preview" style=(state.isFavArticleDisplay)>
               <div className="article-meta">
                 <a href=""> <img src={|http://i.imgur.com/N4VcUeJ.jpg|} /> </a>
                 <div className="info">
