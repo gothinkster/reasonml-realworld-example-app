@@ -5,3 +5,7 @@ let saveTokenToStorage = (value) => {
 let getTokenFromStorage = () => {
   Dom.Storage.(localStorage |> getItem("jwt"))
 };
+
+let saveUserToStorage = (user) => {
+  Dom.Storage.(localStorage |> setItem("currentUser", user))
+};
