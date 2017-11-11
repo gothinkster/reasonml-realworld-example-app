@@ -12,11 +12,11 @@ type state = {
 };
 
 let initialState = {
-  myArticles: [], 
-  favoriteArticles:[], 
-  showMyArticles: true, 
-  showFavArticle: false, 
-  username: "", 
+  myArticles: [],
+  favoriteArticles:[],
+  showMyArticles: true,
+  showFavArticle: false,
+  username: "",
   bio: "",
   isMyArticleDisplay: ReactDOMRe.Style.make(~display="block", ()),
   isFavArticleDisplay: ReactDOMRe.Style.make(~display="none", ())
@@ -26,7 +26,7 @@ type action =
   | MyArticles (list(string))
   | FavoriteArticle (list(string))
   | PendingArticle
-  | CurrentUserFetched (state);
+  | CurrentUserFetched ((string, string));
 
 let clickMyArticles = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
@@ -42,7 +42,7 @@ let clickMyFavorites = (event, {ReasonReact.state, reduce}) => {
   /* This will be in the promise */
   reduce((_) => FavoriteArticle([]),());
 
-  reduce((_) => PendingArticle, ()) 
+  reduce((_) => PendingArticle, ())
 };
 
 /* let displayArticles = () =>  */
@@ -54,7 +54,7 @@ let make = (_children) => {
   reducer: (action, state) =>
     switch action {
     | MyArticles(_articleList) => ReasonReact.Update({
-      ...state, 
+      ...state,
       isMyArticleDisplay: ReactDOMRe.Style.make(~display ="block",()),
       isFavArticleDisplay: ReactDOMRe.Style.make(~display="none", ())
     })
@@ -63,23 +63,23 @@ let make = (_children) => {
       isMyArticleDisplay: ReactDOMRe.Style.make(~display="none", ()),
       isFavArticleDisplay: ReactDOMRe.Style.make(~display="block", ())
     })
-    | CurrentUserFetched (updatedState) => ReasonReact.Update({ ...state, username: updatedState.username, bio: updatedState.bio })
+    | CurrentUserFetched ((username, bio)) => ReasonReact.Update({ ...state, username: username, bio: bio })
     | PendingArticle => ReasonReact.NoUpdate
     },
   didMount: (self) => {
-    
-    let currentUser = Effects.getUserFromStorage();
-    Js.log(currentUser);
-    /* 
-    self.reduce((_) => CurrentUserFetched(currentUser));
-    ReasonReact.NoUpdate 
-    */
-    /* 
-      switch currentUser {
-      | Some() => self.reduce((_) => CurrentUserFetched(user))
-      | None => self.reduce((_) => ReasonReact.NoUpdate)
-    }; 
-    */
+    let (username, bio) = Effects.getUserFromStorage();
+
+    let currentUsername = switch username {
+      | Some(name) => name
+      | None => ""
+    };
+
+    let currentBio = switch bio {
+      | Some(bioText) => bioText
+      | None => ""
+    };
+
+    self.reduce((_) => CurrentUserFetched((currentUsername, currentBio)), ());
     ReasonReact.NoUpdate
   },
   render: (self) => {
