@@ -45,7 +45,16 @@ let clickMyFavorites = (event, {ReasonReact.state, reduce}) => {
   reduce((_) => PendingArticle, ())
 };
 
-/* let displayArticles = () =>  */
+let getDefaultFieldFor = (fieldName) => 
+  switch fieldName {
+    | Some(name) => name
+    | None => ""
+  };
+
+/* side effect */
+let reduceByAuthArticles = (_status, jsonPayload) =>{
+  Js.log(jsonPayload)
+};
 
 let component = ReasonReact.reducerComponent("Profile");
 let make = (_children) => {
@@ -69,16 +78,11 @@ let make = (_children) => {
   didMount: (self) => {
     let (username, bio) = Effects.getUserFromStorage();
 
-    let currentUsername = switch username {
-      | Some(name) => name
-      | None => ""
-    };
-
-    let currentBio = switch bio {
-      | Some(bioText) => bioText
-      | None => ""
-    };
-
+    let currentUsername = getDefaultFieldFor(username);
+    let currentBio = getDefaultFieldFor(bio);
+    let token = Effects.getTokenFromStorage();
+    
+    JsonRequests.getMyArticles(reduceByAuthArticles, currentUsername, token) |> ignore;
     self.reduce((_) => CurrentUserFetched((currentUsername, currentBio)), ());
     ReasonReact.NoUpdate
   },
