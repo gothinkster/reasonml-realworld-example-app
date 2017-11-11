@@ -1,6 +1,5 @@
 let show = ReasonReact.stringToElement;
 
-
 type state = {
   myArticles: list(string),
   favoriteArticles: list(string),
@@ -24,9 +23,10 @@ let initialState = {
 };
 
 type action =
-  | MyArticles(list(string))
-  | FavoriteArticle(list(string))
-  | PendingArticle;
+  | MyArticles (list(string))
+  | FavoriteArticle (list(string))
+  | PendingArticle
+  | CurrentUserFetched (state);
 
 let clickMyArticles = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
@@ -63,8 +63,25 @@ let make = (_children) => {
       isMyArticleDisplay: ReactDOMRe.Style.make(~display="none", ()),
       isFavArticleDisplay: ReactDOMRe.Style.make(~display="block", ())
     })
+    | CurrentUserFetched (updatedState) => ReasonReact.Update({ ...state, username: updatedState.username, bio: updatedState.bio })
     | PendingArticle => ReasonReact.NoUpdate
     },
+  didMount: (self) => {
+    
+    let currentUser = Effects.getUserFromStorage();
+    Js.log(currentUser);
+    /* 
+    self.reduce((_) => CurrentUserFetched(currentUser));
+    ReasonReact.NoUpdate 
+    */
+    /* 
+      switch currentUser {
+      | Some() => self.reduce((_) => CurrentUserFetched(user))
+      | None => self.reduce((_) => ReasonReact.NoUpdate)
+    }; 
+    */
+    ReasonReact.NoUpdate
+  },
   render: (self) => {
     let {ReasonReact.state, reduce} = self;
     <div className="profile-page">

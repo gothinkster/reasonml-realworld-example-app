@@ -25,6 +25,9 @@ module Encode = {
   };
   let user = (topLevelUser) =>
     Json.Encode.(object_([("user", encodeUserCredentials(topLevelUser))]));
+
+  let currentUser = (username, bio) => 
+    Json.Encode.([("username", string(username)), ("bio", string(bio))]);
 };
 
 let updateEmail = (event) =>
@@ -57,8 +60,9 @@ let loginUser = (route, event, {ReasonReact.state, reduce}) => {
                  errorList: errors |> JsonRequests.convertErrorsToList
                }
              | None =>
-               JsonRequests.parseNewUser(json).user.token |> Effects.saveTokenToStorage;
-               Effects.saveUserToStorage(json);
+               let loggedIn = JsonRequests.parseNewUser(json);
+               Effects.saveTokenToStorage(loggedIn.user.token);
+               Effects.saveUserToStorage(loggedIn.user.username, loggedIn.user.bio);
                DirectorRe.setRoute(route, "/home");
                {...state, hasValidationError: false}
              };

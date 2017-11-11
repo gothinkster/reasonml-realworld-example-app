@@ -6,6 +6,17 @@ let getTokenFromStorage = () => {
   Dom.Storage.(localStorage |> getItem("jwt"))
 };
 
-let saveUserToStorage = (user) => {
-  Dom.Storage.(localStorage |> setItem("currentUser", user))
+let saveUserToStorage = (username, bio) => {
+  open Dom.Storage;
+  localStorage |> setItem("username", username);
+  
+  switch bio {
+    | Some(bio) => localStorage |> setItem("bio", bio)
+    | None => ()
+  };
+};
+
+let getUserFromStorage = () => {
+  (Dom.Storage.(localStorage |> getItem("username")), 
+   Dom.Storage.(localStorage |> getItem("bio")));
 };
