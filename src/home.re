@@ -19,8 +19,6 @@ let make = (_children) => {
     | TagsFetched(_tagList) => ReasonReact.NoUpdate
     },
   didMount: (self) => {
-    Js.log("[Info] Home mounted before fetching tags.");
-    
     self.reduce((_) => TagsFetched([]), ());
     ReasonReact.NoUpdate
   },

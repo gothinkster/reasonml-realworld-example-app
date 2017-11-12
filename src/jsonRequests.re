@@ -162,6 +162,6 @@ let getCurrentUser = (getUserFunc, token) =>
   sendRequest(Get, token, None, getUserFunc, constructUrl(Config.CurrentUser));
 
 let getMyArticles = (getArticleFunc, name, token) => {
-  let urlAfterBase = mapUrl(Config.Articles) ++ "?author=" ++ name;
+  let urlAfterBase = apiUrlBase ++ mapUrl(Config.Articles) ++ "?author=" ++ name;
   sendRequest(Get, token, None, getArticleFunc, urlAfterBase); 
 };

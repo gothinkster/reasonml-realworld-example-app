@@ -1,8 +1,18 @@
 let show = ReasonReact.stringToElement;
 
+type article = {
+  slug: string,
+  title: string,
+  description: string,
+  body: string,
+  tagList: list(string), 
+  favorited: bool,
+  favoritedCount: int
+};
+
 type state = {
-  myArticles: list(string),
-  favoriteArticles: list(string),
+  myArticles: list(article),
+  favoriteArticles: list(article),
   showMyArticles: bool,
   showFavArticle: bool,
   username: string,
@@ -23,9 +33,10 @@ let initialState = {
 };
 
 type action =
-  | MyArticles (list(string))
+  | MyArticles (list(article))
   | FavoriteArticle (list(string))
   | PendingArticle
+  | NoData
   | CurrentUserFetched ((string, string));
 
 let clickMyArticles = (event, {ReasonReact.state, reduce}) => {
@@ -51,9 +62,33 @@ let getDefaultFieldFor = (fieldName) =>
     | None => ""
   };
 
+let extractArticleList = (jsonArticles: Js.Json.t) => {
+  let parseArticle = (rawArticle) => 
+    Json.Decode.{
+      slug: rawArticle |> field("slug", string),
+      title: rawArticle |> field("title", string),
+      description: rawArticle |> field("description", string),
+      body: rawArticle |> field("body", string),
+      tagList: rawArticle |> field("tagList", list(string)),
+      favorited: rawArticle |> field("favorited", bool),
+      favoritedCount: rawArticle |> field("favoritedCount", int)
+    };
+  Json.Decode.(jsonArticles |> field("articles", list(parseArticle)));
+};
+
 /* side effect */
-let reduceByAuthArticles = (_status, jsonPayload) =>{
-  Js.log(jsonPayload)
+let reduceByAuthArticles = ({ReasonReact.state, reduce}, _status, jsonPayload) =>  {
+  jsonPayload |> Js.Promise.then_((payload) => {
+    let jsonArticles = Js.Json.parseExn(payload);
+    let articleCount = Json.Decode.(jsonArticles |> field("articlesCount", int));
+    
+    switch articleCount { 
+      | count when count > 0 => reduce((_) => MyArticles(extractArticleList(jsonArticles)), ())
+      | _ => reduce((_) => NoData, ())
+    };
+    
+    payload |> Js.Promise.resolve;
+  });
 };
 
 let component = ReasonReact.reducerComponent("Profile");
@@ -74,6 +109,7 @@ let make = (_children) => {
     })
     | CurrentUserFetched ((username, bio)) => ReasonReact.Update({ ...state, username: username, bio: bio })
     | PendingArticle => ReasonReact.NoUpdate
+    | NoData => ReasonReact.NoUpdate
     },
   didMount: (self) => {
     let (username, bio) = Effects.getUserFromStorage();
@@ -82,7 +118,7 @@ let make = (_children) => {
     let currentBio = getDefaultFieldFor(bio);
     let token = Effects.getTokenFromStorage();
     
-    JsonRequests.getMyArticles(reduceByAuthArticles, currentUsername, token) |> ignore;
+    JsonRequests.getMyArticles(reduceByAuthArticles(self), currentUsername, token) |> ignore;
     self.reduce((_) => CurrentUserFetched((currentUsername, currentBio)), ());
     ReasonReact.NoUpdate
   },
