@@ -165,3 +165,7 @@ let getMyArticles = (getArticleFunc, name, token) => {
   let urlAfterBase = apiUrlBase ++ mapUrl(Config.Articles) ++ "?author=" ++ name;
   sendRequest(Get, token, None, getArticleFunc, urlAfterBase); 
 };
+
+let getPoplarTags = (getTagsFunc) => {
+  sendRequest(Get, None, None, getTagsFunc, constructUrl(Config.Tags));
+};

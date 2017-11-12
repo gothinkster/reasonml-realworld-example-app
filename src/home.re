@@ -5,27 +5,43 @@ let profile_image = {|http://i.imgur.com/Qr71crq.jpg|};
 let second_image = {|"http://i.imgur.com/N4VcUeJ.jpg"|};
 
 type action =
-  | TagsFetched(list(string));
+  | TagsFetched(array(string));
 
-type state = {tags: list(string)};
+type state = {tags: array(string)};
+
+let renderTag = (index, tag) => {  
+  <a href="" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
+};
 
 let component = ReasonReact.reducerComponent("Home");
 
 let make = (_children) => {
   ...component,
-  initialState: () => {tags: []},
+  initialState: () => {tags: [||]},
   reducer: (action, _state) =>
     switch action {
-    | TagsFetched(_tagList) => ReasonReact.NoUpdate
+    | TagsFetched(tagList) => ReasonReact.Update({tags: tagList})
     },
   didMount: (self) => {
-    self.reduce((_) => TagsFetched([]), ());
+    let reduceTags = (_status, jsonPayload) => {
+      
+      jsonPayload |> Js.Promise.then_((result) => {
+        let parsedPopularTags = Js.Json.parseExn(result);        
+        let tags = Json.Decode.(parsedPopularTags |> field("tags", array(string)));
+        Js.log(Array.length(tags));
+        self.reduce((_) => TagsFetched(tags), ());
+      
+        tags |> Js.Promise.resolve
+      }) |> ignore;
+    };
+    JsonRequests.getPoplarTags(reduceTags) |> ignore;
+
     ReasonReact.NoUpdate
   },
   render: (self) => {
     let {ReasonReact.state} = self;
     <div className="home-page">
-      (ReasonReact.stringToElement(string_of_int(List.length(state.tags))))
+    (ReasonReact.stringToElement(string_of_int(Array.length(state.tags))))
       <div className="banner">
         <div className="container">
           <h1 className="logo-font"> (show("conduit")) </h1>
@@ -65,7 +81,7 @@ let make = (_children) => {
             </div>
             <div className="article-preview">
               <div className="article-meta">
-                <a href="profile.html" />
+                <a href="profile.html" /> 
                 <div className="info">
                   <a href="" className="author"> (show("Albert Pai")) </a>
                   <span className="date"> (show("January 20th")) </span>
@@ -88,14 +104,7 @@ let make = (_children) => {
             <div className="sidebar">
               <p> (show("Popular Tags")) </p>
               <div className="tag-list">
-                <a href="" className="tag-pill tag-default"> (show("programming")) </a>
-                <a href="" className="tag-pill tag-default"> (show("javascript")) </a>
-                <a href="" className="tag-pill tag-default"> (show("emberjs")) </a>
-                <a href="" className="tag-pill tag-default"> (show("angularjs")) </a>
-                <a href="" className="tag-pill tag-default"> (show("react")) </a>
-                <a href="" className="tag-pill tag-default"> (show("mean")) </a>
-                <a href="" className="tag-pill tag-default"> (show("node")) </a>
-                <a href="" className="tag-pill tag-default"> (show("rails")) </a>
+                (Array.mapi(renderTag,state.tags) |> ReasonReact.arrayToElement)
               </div>
             </div>
           </div>

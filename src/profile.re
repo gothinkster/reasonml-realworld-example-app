@@ -63,6 +63,7 @@ let getDefaultFieldFor = (fieldName) =>
   };
 
 let extractArticleList = (jsonArticles: Js.Json.t) => {
+  Js.log("before decoding");
   let parseArticle = (rawArticle) => 
     Json.Decode.{
       slug: rawArticle |> field("slug", string),
@@ -73,7 +74,7 @@ let extractArticleList = (jsonArticles: Js.Json.t) => {
       favorited: rawArticle |> field("favorited", bool),
       favoritedCount: rawArticle |> field("favoritedCount", int)
     };
-  Json.Decode.(jsonArticles |> field("articles", list(parseArticle)));
+  Json.Decode.(jsonArticles |> field("articles", list(parseArticle)));  
 };
 
 /* side effect */
