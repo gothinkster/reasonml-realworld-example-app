@@ -40,8 +40,7 @@ let make = (_children) => {
   },
   render: (self) => {
     let {ReasonReact.state} = self;
-    <div className="home-page">
-    (ReasonReact.stringToElement(string_of_int(Array.length(state.tags))))
+    <div className="home-page">    
       <div className="banner">
         <div className="container">
           <h1 className="logo-font"> (show("conduit")) </h1>
