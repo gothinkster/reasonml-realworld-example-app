@@ -19,3 +19,14 @@ type registeredUser = {
   errors: option(errorDetails),
   user
 };
+
+type articleDetails = {
+  title: string,
+  description: string,
+  body: string,
+  tags: array(string)
+};
+
+type newArticle = {
+  article: articleDetails
+};
