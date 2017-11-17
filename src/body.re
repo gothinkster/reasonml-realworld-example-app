@@ -13,7 +13,7 @@ let make = (~route, ~router, _children) => {
       | Routes.Login => <Login router />
       | Routes.Settings => <Settings router />
       | Routes.Article => <Article />
-      | Routes.CreateArticle => <CreateArticle />
+      | Routes.CreateArticle => <CreateArticle router />
       | Routes.EditArticle => <Article />
       | Routes.Profile => <Profile />
       };
