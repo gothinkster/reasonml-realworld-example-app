@@ -10,10 +10,7 @@ type state = {
 type action =
   | ArticleSubmitted(DirectorRe.t);
 
-let parseTags = (enteredTags) => {    
-  let encodeTags = (tag) => Json.Encode.([(tag, string)]);
-  Js.String.split(",", enteredTags)
-};
+let parseTags = (enteredTags) => Js.String.split(",", enteredTags);
 
 module Encode = {  
   let newArticle = (articleDetails: state) => {
