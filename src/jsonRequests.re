@@ -168,3 +168,7 @@ let getMyArticles = (getArticleFunc, name, token) => {
 let getPoplarTags = (getTagsFunc) => {
   sendRequest(Get, None, None, getTagsFunc, constructUrl(Config.Tags));
 };
+
+let submitNewArtcile = (submissionResponse, jsonData, token) => {
+  sendRequest(Post, token, Some(jsonData), submissionResponse, (constructUrl(Config.Articles)))
+};

@@ -10,8 +10,29 @@ type state = {
 type action =
   | ArticleSubmitted(DirectorRe.t);
 
+let parseTags = (enteredTags) => {    
+  let encodeTags = (tag) => Json.Encode.([(tag, string)]);
+  Js.String.split(",", enteredTags)
+};
+
+module Encode = {  
+  let newArticle = (articleDetails: state) => {
+    Json.Encode.(object_([
+      ("title", string(articleDetails.title)),
+      ("description", string(articleDetails.description)),
+      ("articleBody", string(articleDetails.articleBody)),
+      ("tagList", parseTags(articleDetails.rawTags) |> Json.Encode.stringArray)
+    ]));
+  };
+};
+
+let submissionResponse = (_status, payload) => {
+
+};
+
 let submitNewArticle = (router, event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
+  JsonRequests.submitNewArtcile(submissionResponse, Encode.newArticle(state) , Effects.getTokenFromStorage()) |> ignore;
   let reduceArticleSubmission = (_) => ArticleSubmitted(router);
   reduce(reduceArticleSubmission, ())
 };
