@@ -5,22 +5,62 @@ let profile_image = {|http://i.imgur.com/Qr71crq.jpg|};
 let second_image = {|"http://i.imgur.com/N4VcUeJ.jpg"|};
 
 type action =
-  | TagsFetched(array(string));
+  | TagsFetched(array(string))
+  | ShowMyFeed
+  | ShowGlobalFeed;  
 
-type state = {tags: array(string)};
+type state = {
+  myFeedDisplay: ReactDOMRe.style,
+  globalFeedDisplay: ReactDOMRe.style,
+  myFeedActiveClass: string,
+  globalfeedActiveClass: string,
+  tags: array(string)
+};
+
+let initialState = () => {
+  tags: [||], 
+  myFeedDisplay: ReactDOMRe.Style.make(~display="none", ()), 
+  globalFeedDisplay: ReactDOMRe.Style.make(~display="block", ()),
+  myFeedActiveClass: "nav-link disabled",
+  globalfeedActiveClass: "nav-link active"
+};
 
 let renderTag = (index, tag) => {  
   <a href="" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
+};
+
+let showMyFeed = (event, {ReasonReact.state, reduce}) => {
+  ReactEventRe.Mouse.preventDefault(event);
+  reduce((_) => ShowMyFeed,());
+};
+
+let showGlobalFeed = (event, {ReasonReact.state, reduce}) => {
+  ReactEventRe.Mouse.preventDefault(event);
+  reduce((_) => ShowGlobalFeed,());
 };
 
 let component = ReasonReact.reducerComponent("Home");
 
 let make = (_children) => {
   ...component,
-  initialState: () => {tags: [||]},
-  reducer: (action, _state) =>
+  initialState: initialState,
+  reducer: (action, state) =>
     switch action {
-    | TagsFetched(tagList) => ReasonReact.Update({tags: tagList})
+    | TagsFetched(tagList) => ReasonReact.Update({...state, tags: tagList})
+    | ShowMyFeed => ReasonReact.Update({
+      ...state, 
+      myFeedDisplay: ReactDOMRe.Style.make(~display="block", ()), 
+      globalFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
+      myFeedActiveClass: "nav-link active",
+      globalfeedActiveClass: "nav-link disabled"
+    })
+    | ShowGlobalFeed => ReasonReact.Update({
+      ...state, 
+      myFeedDisplay: ReactDOMRe.Style.make(~display="none", ()), 
+      globalFeedDisplay: ReactDOMRe.Style.make(~display="block", ()),
+      myFeedActiveClass: "nav-link disabled",
+      globalfeedActiveClass: "nav-link active"
+    })
     },
   didMount: (self) => {
     let reduceTags = (_status, jsonPayload) => {
@@ -53,14 +93,14 @@ let make = (_children) => {
             <div className="feed-toggle">
               <ul className="nav nav-pills outline-active">
                 <li className="nav-item">
-                  <a className="nav-link disabled" href=""> (show("Your Feed")) </a>
+                  <a className=(state.myFeedActiveClass) href="#" onClick=(self.handle(showMyFeed))> (show("Your Feed")) </a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link active" href=""> (show("Global Feed")) </a>
+                  <a className=(state.globalfeedActiveClass) href="#" onClick=(self.handle(showGlobalFeed))> (show("Global Feed")) </a>
                 </li>
               </ul>
             </div>
-            <div className="article-preview">
+            <div className="article-preview" style=(state.myFeedDisplay)>
               <div className="article-meta">
                 <a href="profile.html" />
                 <div className="info">
@@ -78,7 +118,7 @@ let make = (_children) => {
                 <span> (show("Read more...")) </span>
               </a>
             </div>
-            <div className="article-preview">
+            <div className="article-preview" style=(state.globalFeedDisplay)>
               <div className="article-meta">
                 <a href="profile.html" /> 
                 <div className="info">
