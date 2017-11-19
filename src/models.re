@@ -43,7 +43,7 @@ type article = {
   title: string,
   description: string,
   body: string,
-  taglist: array(string),
+  tagList: array(string),
   createdAt: string,
   updatedAt: string,
   favorited: bool,

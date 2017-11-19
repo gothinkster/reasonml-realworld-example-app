@@ -1,3 +1,5 @@
+open Models;
+
 let show = ReasonReact.stringToElement;
 
 let profile_image = {|http://i.imgur.com/Qr71crq.jpg|};
@@ -25,17 +27,38 @@ let initialState = () => {
   globalfeedActiveClass: "nav-link active"
 };
 
+let decodeAuthor = (json) => 
+  Json.Decode.{
+    username: json |> field("username", string),
+    bio: json |> field("bio", string),
+    image: json |> field("image", string),
+    following: json |> field("following", bool)
+  };
+
+let decodeArticles = (json) => 
+  Json.Decode.{
+    slug: json |> field("slug", string),
+    title: json |> field("title", string),
+    description: json |> field("description", string),
+    body: json |> field("body", string),
+    tagList: json |> field("tagList", array(string)),
+    createdAt: json |> field("createdAt", string),
+    updatedAt: json |> field("updatedAt", string),
+    favorited: json |> field("favorited", bool),
+    favoritesCount: json |> field("favoritesCount", int),
+    author: json |> field("author", decodeAuthor)
+  };
+
 let renderTag = (index, tag) => {
   <a href="" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
 };
 
 let populateTags = (reduce) => {
   let reduceTags = (_status, jsonPayload) => {
-    
+
     jsonPayload |> Js.Promise.then_((result) => {
       let parsedPopularTags = Js.Json.parseExn(result);
       let tags = Json.Decode.(parsedPopularTags |> field("tags", array(string)));
-      Js.log(Array.length(tags));
       reduce((_) => TagsFetched(tags), ());
 
       tags |> Js.Promise.resolve
@@ -48,6 +71,7 @@ let populateGlobalFeed = (reduce) => {
   let reduceFeed = (_state, jsonPayload) => {
     jsonPayload |> Js.Promise.then_((result) => {
       Js.log(result);
+      let parsedArticles = Js.Json.parseExn(result);
       result |> Js.Promise.resolve
     })
   };
@@ -57,12 +81,12 @@ let populateGlobalFeed = (reduce) => {
 
 let showMyFeed = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
-  populateGlobalFeed(reduce); 
   reduce((_) => ShowMyFeed,());
 };
 
 let showGlobalFeed = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
+  populateGlobalFeed(reduce);
   reduce((_) => ShowGlobalFeed,());
 };
 
@@ -91,6 +115,7 @@ let make = (_children) => {
     },
   didMount: (self) => {
     populateTags(self.reduce);
+    populateGlobalFeed(self.reduce);
     ReasonReact.NoUpdate
   },
   render: (self) => {
