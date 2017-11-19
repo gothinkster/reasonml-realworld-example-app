@@ -161,8 +161,13 @@ let getCurrentUser = (getUserFunc, token) =>
   sendRequest(Get, token, None, getUserFunc, constructUrl(Config.CurrentUser));
 
 let getMyArticles = (getArticleFunc, name, token) => {
-  let urlAfterBase = apiUrlBase ++ mapUrl(Config.Articles) ++ "?author=" ++ name;
+  let urlAfterBase = apiUrlBase ++ mapUrl(Config.Articles) ++ "?favorited=" ++ name;
   sendRequest(Get, token, None, getArticleFunc, urlAfterBase); 
+};
+
+let getGlobalArticles = (getArticlesFunc, token, limit, offset) => {
+  let urlAfterBase = apiUrlBase ++ mapUrl(Config.Articles) ++ "?limit=" ++ string_of_int(limit) ++ "&offset=" ++ string_of_int(offset);
+  sendRequest(Get, token, None, getArticlesFunc, urlAfterBase);
 };
 
 let getPoplarTags = (getTagsFunc) => {

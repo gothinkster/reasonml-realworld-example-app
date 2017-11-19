@@ -30,3 +30,28 @@ type articleDetails = {
 type newArticle = {
   article: articleDetails
 };
+
+type author = {
+  username: string,
+  bio: string,
+  image: string,
+  following: bool
+};
+
+type article = {
+  slug: string,
+  title: string,
+  description: string,
+  body: string,
+  taglist: array(string),
+  createdAt: string,
+  updatedAt: string,
+  favorited: bool,
+  favoritesCount: int,
+  author: author
+};
+
+type articleList = {
+  articles: array(article),
+  articlesCount: int
+};

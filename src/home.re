@@ -7,7 +7,7 @@ let second_image = {|"http://i.imgur.com/N4VcUeJ.jpg"|};
 type action =
   | TagsFetched(array(string))
   | ShowMyFeed
-  | ShowGlobalFeed;  
+  | ShowGlobalFeed;
 
 type state = {
   myFeedDisplay: ReactDOMRe.style,
@@ -18,19 +18,46 @@ type state = {
 };
 
 let initialState = () => {
-  tags: [||], 
-  myFeedDisplay: ReactDOMRe.Style.make(~display="none", ()), 
+  tags: [||],
+  myFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
   globalFeedDisplay: ReactDOMRe.Style.make(~display="block", ()),
   myFeedActiveClass: "nav-link disabled",
   globalfeedActiveClass: "nav-link active"
 };
 
-let renderTag = (index, tag) => {  
+let renderTag = (index, tag) => {
   <a href="" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
+};
+
+let populateTags = (reduce) => {
+  let reduceTags = (_status, jsonPayload) => {
+    
+    jsonPayload |> Js.Promise.then_((result) => {
+      let parsedPopularTags = Js.Json.parseExn(result);
+      let tags = Json.Decode.(parsedPopularTags |> field("tags", array(string)));
+      Js.log(Array.length(tags));
+      reduce((_) => TagsFetched(tags), ());
+
+      tags |> Js.Promise.resolve
+    }) |> ignore;
+  };
+  JsonRequests.getPoplarTags(reduceTags) |> ignore;
+};
+
+let populateGlobalFeed = (reduce) => {
+  let reduceFeed = (_state, jsonPayload) => {
+    jsonPayload |> Js.Promise.then_((result) => {
+      Js.log(result);
+      result |> Js.Promise.resolve
+    })
+  };
+  /* Get the right page if there are more than 10 articles */
+  JsonRequests.getGlobalArticles(reduceFeed, Effects.getTokenFromStorage(), 10, 0) |> ignore;
 };
 
 let showMyFeed = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
+  populateGlobalFeed(reduce); 
   reduce((_) => ShowMyFeed,());
 };
 
@@ -48,39 +75,27 @@ let make = (_children) => {
     switch action {
     | TagsFetched(tagList) => ReasonReact.Update({...state, tags: tagList})
     | ShowMyFeed => ReasonReact.Update({
-      ...state, 
-      myFeedDisplay: ReactDOMRe.Style.make(~display="block", ()), 
+      ...state,
+      myFeedDisplay: ReactDOMRe.Style.make(~display="block", ()),
       globalFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
       myFeedActiveClass: "nav-link active",
       globalfeedActiveClass: "nav-link disabled"
     })
     | ShowGlobalFeed => ReasonReact.Update({
-      ...state, 
-      myFeedDisplay: ReactDOMRe.Style.make(~display="none", ()), 
+      ...state,
+      myFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
       globalFeedDisplay: ReactDOMRe.Style.make(~display="block", ()),
       myFeedActiveClass: "nav-link disabled",
       globalfeedActiveClass: "nav-link active"
     })
     },
   didMount: (self) => {
-    let reduceTags = (_status, jsonPayload) => {
-      
-      jsonPayload |> Js.Promise.then_((result) => {
-        let parsedPopularTags = Js.Json.parseExn(result);        
-        let tags = Json.Decode.(parsedPopularTags |> field("tags", array(string)));
-        Js.log(Array.length(tags));
-        self.reduce((_) => TagsFetched(tags), ());
-      
-        tags |> Js.Promise.resolve
-      }) |> ignore;
-    };
-    JsonRequests.getPoplarTags(reduceTags) |> ignore;
-
+    populateTags(self.reduce);
     ReasonReact.NoUpdate
   },
   render: (self) => {
     let {ReasonReact.state} = self;
-    <div className="home-page">    
+    <div className="home-page">
       <div className="banner">
         <div className="container">
           <h1 className="logo-font"> (show("conduit")) </h1>
@@ -120,7 +135,7 @@ let make = (_children) => {
             </div>
             <div className="article-preview" style=(state.globalFeedDisplay)>
               <div className="article-meta">
-                <a href="profile.html" /> 
+                <a href="profile.html" />
                 <div className="info">
                   <a href="" className="author"> (show("Albert Pai")) </a>
                   <span className="date"> (show("January 20th")) </span>
