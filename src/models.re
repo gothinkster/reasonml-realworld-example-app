@@ -33,8 +33,8 @@ type newArticle = {
 
 type author = {
   username: string,
-  bio: string,
-  image: string,
+  bio: option(string),
+  image: option(string),
   following: bool
 };
 
