@@ -3,7 +3,6 @@ open Models;
 let show = ReasonReact.stringToElement;
 
 let profile_image = {|http://i.imgur.com/Qr71crq.jpg|};
-
 let second_image = {|"http://i.imgur.com/N4VcUeJ.jpg"|};
 
 type action =
@@ -99,6 +98,7 @@ let showGlobalFeed = (event, {ReasonReact.state, reduce}) => {
 };
 
 let renderTag = (index, tag) => {
+  
   <a href="" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
 };
 
@@ -109,11 +109,11 @@ let renderArticle = (index, articles) =>
         <a href="profile.html" />
         <div className="info">
           <a href="" className="author"> (show(articles.author.username)) </a>
-          <span className="date"> (show("January 20th")) </span>
+          <span className="date"> (show(Js.Date.fromString(articles.createdAt) |> Js.Date.toDateString)) </span>
         </div>
         <button className="btn btn-outline-primary btn-sm pull-xs-right">
           <i className="ion-heart" />
-          (show("32"))
+          (show("0"))
         </button>
       </div>
       <a href="" className="preview-link">

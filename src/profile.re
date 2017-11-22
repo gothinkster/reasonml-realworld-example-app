@@ -185,7 +185,7 @@ let make = (_children) => {
                 </div>
                 <button className="btn btn-outline-primary btn-sm pull-xs-right">
                   <i className="ion-heart" />
-                  (show("32"))
+                  (show("0"))
                 </button>
               </div>
               <a href="" className="preview-link">
