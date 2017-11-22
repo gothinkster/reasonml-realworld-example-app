@@ -8,13 +8,13 @@ let make = (~route, ~router, _children) => {
   render: (_self) => {
     let select_subpage = (route) =>
       switch route {
-      | Routes.Home => <Home />
+      | Routes.Home => <Home router />
       | Routes.Register => <Register router />
       | Routes.Login => <Login router />
       | Routes.Settings => <Settings router />
-      | Routes.Article => <Article />
+      | Routes.Article => <Article router />
       | Routes.CreateArticle => <CreateArticle router />
-      | Routes.EditArticle => <Article />
+      | Routes.EditArticle => <Article router />
       | Routes.Profile => <Profile />
       };
     <div> <Header router /> <div> (route |> select_subpage) </div> <Footer /> </div>

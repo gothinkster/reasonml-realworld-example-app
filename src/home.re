@@ -97,12 +97,16 @@ let showGlobalFeed = (event, {ReasonReact.state, reduce}) => {
   reduce((_) => ShowGlobalFeed,());
 };
 
+let goToArticle = (router, event, {ReasonReact.state}) => {
+  ReactEventRe.Mouse.preventDefault(event);
+  DirectorRe.setRoute(router,"/article")
+};
+
 let renderTag = (index, tag) => {
-  
   <a href="" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
 };
 
-let renderArticle = (index, articles) =>
+let renderArticle = (handle, router, index, articles) =>
   <div key=(string_of_int(index)) className="article-preview">
     <div>
       <div className="article-meta">
@@ -116,7 +120,7 @@ let renderArticle = (index, articles) =>
           (show("0"))
         </button>
       </div>
-      <a href="" className="preview-link">
+      <a href="#" onClick=(handle(goToArticle(router))) className="preview-link">
         <h1>
           (show(articles.title))
         </h1>
@@ -128,7 +132,7 @@ let renderArticle = (index, articles) =>
 
 let component = ReasonReact.reducerComponent("Home");
 
-let make = (_children) => {
+let make = (~router, _children) => {
   ...component,
   initialState: initialState,
   reducer: (action, state) =>
@@ -200,7 +204,7 @@ let make = (_children) => {
               </a>
             </div>
             <div style=(state.globalFeedDisplay)>
-              (Array.mapi(renderArticle, state.articles) |> ReasonReact.arrayToElement)
+              (Array.mapi(renderArticle(self.handle, router), state.articles) |> ReasonReact.arrayToElement)
             </div>
           </div>
           <div className="col-md-3">

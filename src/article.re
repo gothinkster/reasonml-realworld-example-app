@@ -2,7 +2,7 @@ let component = ReasonReact.statelessComponent("Article");
 
 let show = ReasonReact.stringToElement;
 
-let make = (_children) => {
+let make = (~router, _children) => {
   ...component,
   render: (_self) =>
     <div className="article-page">
