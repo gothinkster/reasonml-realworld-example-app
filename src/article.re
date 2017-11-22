@@ -17,14 +17,14 @@ let make = (~router, _children) => {
             </div>
             <button className="btn btn-sm btn-outline-secondary">
               <i className="ion-plus-round" />
-              (show("&nbsp;"))
+              (show(" "))
               (show("Follow Eric Simons"))
               <span className="counter"> (show("(10)")) </span>
             </button>
-            (show("&nbsp;&nbsp;"))
+            (ReasonReact.stringToElement("  "))
             <button className="btn btn-sm btn-outline-primary">
               <i className="ion-heart" />
-              (show("&nbsp;"))
+              (ReasonReact.stringToElement(" "))
               (show("Favorite Post"))
               <span className="counter"> (show("(29)")) </span>
             </button>
@@ -55,14 +55,14 @@ let make = (~router, _children) => {
             </div>
             <button className="btn btn-sm btn-outline-secondary">
               <i className="ion-plus-round" />
-              (show("&nbsp;"))
+              (show(" "))
               (show("Follow Eric Simons"))
               <span className="counter"> (show("(10)")) </span>
             </button>
-            (show("&nbsp;"))
+            (show(" "))
             <button className="btn btn-sm btn-outline-primary">
               <i className="ion-heart" />
-              (show("&nbsp;"))
+              (ReasonReact.stringToElement(" "))
               (show("Favorite Post"))
               <span className="counter"> (show("(29)")) </span>
             </button>
@@ -89,7 +89,7 @@ let make = (~router, _children) => {
                 <a href="" className="comment-author">
                   <img src="http://i.imgur.com/Qr71crq.jpg" className="comment-author-img" />
                 </a>
-                (show("&nbsp;"))
+                (show(" "))
                 <a href="" className="comment-author"> (show("Jacob Schmidt")) </a>
                 <span className="date-posted"> (show("Dec 29th")) </span>
               </div>
@@ -104,7 +104,7 @@ let make = (~router, _children) => {
                 <a href="" className="comment-author">
                   <img src="http://i.imgur.com/Qr71crq.jpg" className="comment-author-img" />
                 </a>
-                (show("&nbsp;"))
+                (show(" "))
                 <a href="" className="comment-author"> (show("Jacob Schmidt")) </a>
                 <span className="date-posted"> (show("Dec 29th")) </span>
                 <span className="mod-options">
