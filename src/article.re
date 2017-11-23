@@ -1,14 +1,16 @@
+open Models;
+
 let component = ReasonReact.statelessComponent("Article");
 
 let show = ReasonReact.stringToElement;
 
-let make = (~router, _children) => {
+let make = (~router, ~article, _children) => {
   ...component,
   render: (_self) =>
     <div className="article-page">
       <div className="banner">
         <div className="container">
-          <h1> (show("How to build webapps that scale")) </h1>
+          <h1> (show(article.title)) </h1>
           <div className="article-meta">
             <a href=""> <img src="http://i.imgur.com/Qr71crq.jpg" /> </a>
             <div className="info">
