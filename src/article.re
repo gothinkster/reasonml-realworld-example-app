@@ -4,6 +4,28 @@ let component = ReasonReact.statelessComponent("Article");
 
 let show = ReasonReact.stringToElement;
 
+let renderComment = (body) => {
+  <div className="card">
+    <div className="card-block">
+      <p className="card-text">
+        (show("With supporting text below as a natural lead-in to additional content."))
+      </p>
+    </div>
+    <div className="card-footer">
+      <a href="" className="comment-author">
+        <img src="http://i.imgur.com/Qr71crq.jpg" className="comment-author-img" />
+      </a>
+      (show(" "))
+      <a href="" className="comment-author"> (show("Jacob Schmidt")) </a>
+      <span className="date-posted"> (show("Dec 29th")) </span>
+      <span className="mod-options">
+        <i className="ion-edit" />
+        <i className="ion-trash-a" />
+      </span>
+    </div>
+  </div>
+};
+
 let make = (~router, ~article, _children) => {
   ...component,
   render: (_self) =>
@@ -14,13 +36,13 @@ let make = (~router, ~article, _children) => {
           <div className="article-meta">
             <a href=""> <img src="http://i.imgur.com/Qr71crq.jpg" /> </a>
             <div className="info">
-              <a href="" className="author"> (show("Eric Simons")) </a>
-              <span className="date"> (show("January 20th")) </span>
+              <a href="" className="author"> (show(article.author.username)) </a>
+              <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
             </div>
             <button className="btn btn-sm btn-outline-secondary">
               <i className="ion-plus-round" />
               (show(" "))
-              (show("Follow Eric Simons"))
+              (show(article.author.username))
               <span className="counter"> (show("(10)")) </span>
             </button>
             (ReasonReact.stringToElement("  "))
@@ -28,7 +50,7 @@ let make = (~router, ~article, _children) => {
               <i className="ion-heart" />
               (ReasonReact.stringToElement(" "))
               (show("Favorite Post"))
-              <span className="counter"> (show("(29)")) </span>
+              <span className="counter"> (show("(0)")) </span>
             </button>
           </div>
         </div>
@@ -37,14 +59,8 @@ let make = (~router, ~article, _children) => {
         <div className="row article-content">
           <div className="col-md-12">
             <p>
-              (
-                show(
-                  "Web development technologies have evolved at an incredible clip over the past few years."
-                )
-              )
+              (show(article.body))
             </p>
-            <h2 id="introducing-ionic"> (show("Introducing RealWorld.")) </h2>
-            <p> (show("It's a great solution for learning how other frameworks work.")) </p>
           </div>
         </div>
         <hr />
@@ -52,21 +68,21 @@ let make = (~router, ~article, _children) => {
           <div className="article-meta">
             <a href="profile.html"> <img src="http://i.imgur.com/Qr71crq.jpg" /> </a>
             <div className="info">
-              <a href="" className="author"> (show("Eric Simons")) </a>
-              <span className="date"> (show("January 20th")) </span>
+              <a href="" className="author"> (show(article.author.username)) </a>
+              <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
             </div>
             <button className="btn btn-sm btn-outline-secondary">
               <i className="ion-plus-round" />
               (show(" "))
-              (show("Follow Eric Simons"))
-              <span className="counter"> (show("(10)")) </span>
+              (show(article.author.username))
+              <span className="counter"> (show("(0)")) </span>
             </button>
             (show(" "))
             <button className="btn btn-sm btn-outline-primary">
               <i className="ion-heart" />
               (ReasonReact.stringToElement(" "))
               (show("Favorite Post"))
-              <span className="counter"> (show("(29)")) </span>
+              <span className="counter"> (show("(0)")) </span>
             </button>
           </div>
         </div>
@@ -81,40 +97,7 @@ let make = (~router, ~article, _children) => {
                 <button className="btn btn-sm btn-primary"> (show("Post Comment")) </button>
               </div>
             </form>
-            <div className="card">
-              <div className="card-block">
-                <p className="card-text">
-                  (show("With supporting text below as a natural lead-in to additional content."))
-                </p>
-              </div>
-              <div className="card-footer">
-                <a href="" className="comment-author">
-                  <img src="http://i.imgur.com/Qr71crq.jpg" className="comment-author-img" />
-                </a>
-                (show(" "))
-                <a href="" className="comment-author"> (show("Jacob Schmidt")) </a>
-                <span className="date-posted"> (show("Dec 29th")) </span>
-              </div>
-            </div>
-            <div className="card">
-              <div className="card-block">
-                <p className="card-text">
-                  (show("With supporting text below as a natural lead-in to additional content."))
-                </p>
-              </div>
-              <div className="card-footer">
-                <a href="" className="comment-author">
-                  <img src="http://i.imgur.com/Qr71crq.jpg" className="comment-author-img" />
-                </a>
-                (show(" "))
-                <a href="" className="comment-author"> (show("Jacob Schmidt")) </a>
-                <span className="date-posted"> (show("Dec 29th")) </span>
-                <span className="mod-options">
-                  <i className="ion-edit" />
-                  <i className="ion-trash-a" />
-                </span>
-              </div>
-            </div>
+            (renderComment(""))
           </div>
         </div>
       </div>
