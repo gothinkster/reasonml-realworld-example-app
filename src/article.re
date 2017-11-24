@@ -8,23 +8,34 @@ type comment = {
   author: author
 };
 
+type commentList = {
+  comments: list(comment)
+};
+
 type state = {
   slug: string,
   commentList: list(comment)
 };
 
+/* type commentAuthor = {
+  username: string,
+  bio: option(string),
+  image: option(string),
+  following: bool
+}; */
+
 type action =
   | AddComment
   | DeleteComment
-  | FetchComments;
+  | FetchComments(list(comment));
 
 let show = ReasonReact.stringToElement;
 let component = ReasonReact.reducerComponent("Article");
 let renderComment = (index, comment) => {
-  <div className="card">
+  <div className="card" key=(string_of_int(index))>
     <div className="card-block">
       <p className="card-text">
-        (show("With supporting text below as a natural lead-in to additional content."))
+        (show(comment.body))
       </p>
     </div>
     <div className="card-footer">
@@ -32,8 +43,8 @@ let renderComment = (index, comment) => {
         <img src="http://i.imgur.com/Qr71crq.jpg" className="comment-author-img" />
       </a>
       (show(" "))
-      <a href="" className="comment-author"> (show("Jacob Schmidt")) </a>
-      <span className="date-posted"> (show("Dec 29th")) </span>
+      <a href="" className="comment-author"> (show(comment.author.username)) </a>
+      <span className="date-posted"> (show(Js.Date.fromString(comment.createdAt) |> Js.Date.toDateString)) </span>
       <span className="mod-options">
         <i className="ion-edit" />
         <i className="ion-trash-a" />
@@ -42,15 +53,50 @@ let renderComment = (index, comment) => {
   </div>
 };
 
+let decodeAuthor = (json) => {
+  Json.Decode.{
+    username: json |> field("username", string),
+    bio: json |> optional(field("bio", string)),
+    image: json |> optional(field("image", string)),
+    following: json |> field("following", bool)
+  };
+};
+
+let decodeComment = (json) => {
+  Json.Decode.{
+    id: json |> field("id", int),
+    createdAt: json |> field("createdAt", string),
+    updatedAt: json |> field("updatedAt", string),
+    body: json |> field("body", string),
+    author: json |> field("author", decodeAuthor)
+  };
+};
+
 let make = (~router, ~article, _children) => {
   ...component,
-  initialState: () => {slug: "", commentList: []},
+  initialState: () => {slug: article.slug, commentList: []},
   reducer: (action, state) =>
     switch action {
       | AddComment => ReasonReact.NoUpdate
       | DeleteComment => ReasonReact.NoUpdate
-      | FetchComments => ReasonReact.NoUpdate
+      | FetchComments(comments) => ReasonReact.Update({...state, commentList: comments})
     },
+  didMount: (self) => {
+    let reduceComments = (_status, jsonPayload) => {
+      jsonPayload |> Js.Promise.then_((result) => {
+        Js.log(result);
+        let parsedComments = Js.Json.parseExn(result);
+        let commentList = Json.Decode.{
+          comments: parsedComments |> field("comments", list(decodeComment))
+        };
+        Js.log(commentList);
+        self.reduce((_) => FetchComments(commentList.comments), ());
+        result |> Js.Promise.resolve
+      })
+    };
+    JsonRequests.commentsForArticle(self.state.slug, reduceComments) |> ignore;
+    ReasonReact.NoUpdate
+  },
   render: (self) =>
     <div className="article-page">
       <div className="banner">

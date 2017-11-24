@@ -177,3 +177,7 @@ let getPoplarTags = (getTagsFunc) => {
 let submitNewArticle = (submissionResponse, jsonData, token) => {
   sendRequest(Post, token, Some(jsonData), submissionResponse, (constructUrl(Config.Articles)))
 };
+
+let commentsForArticle = (slug, commentsFunc) => {
+  sendRequest(Get, None, None, commentsFunc, (constructUrl(Config.ArticleCommentBySlug(slug))))
+};

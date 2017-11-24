@@ -31,6 +31,7 @@ let initialState = () => {
   articleCount: 0
 };
 
+/* article page uses this decoder as well */
 let decodeAuthor = (json) =>
   Json.Decode.{
     username: json |> field("username", string), 
