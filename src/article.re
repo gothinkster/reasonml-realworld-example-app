@@ -1,10 +1,26 @@
 open Models;
 
-let component = ReasonReact.statelessComponent("Article");
+type comment = {
+  id: int,
+  createdAt: string,
+  updatedAt: string,
+  body: string,
+  author: author
+};
+
+type state = {
+  slug: string,
+  commentList: list(comment)
+};
+
+type action =
+  | AddComment
+  | DeleteComment
+  | FetchComments;
 
 let show = ReasonReact.stringToElement;
-
-let renderComment = (body) => {
+let component = ReasonReact.reducerComponent("Article");
+let renderComment = (index, comment) => {
   <div className="card">
     <div className="card-block">
       <p className="card-text">
@@ -28,7 +44,14 @@ let renderComment = (body) => {
 
 let make = (~router, ~article, _children) => {
   ...component,
-  render: (_self) =>
+  initialState: () => {slug: "", commentList: []},
+  reducer: (action, state) =>
+    switch action {
+      | AddComment => ReasonReact.NoUpdate
+      | DeleteComment => ReasonReact.NoUpdate
+      | FetchComments => ReasonReact.NoUpdate
+    },
+  render: (self) =>
     <div className="article-page">
       <div className="banner">
         <div className="container">
@@ -97,7 +120,7 @@ let make = (~router, ~article, _children) => {
                 <button className="btn btn-sm btn-primary"> (show("Post Comment")) </button>
               </div>
             </form>
-            (renderComment(""))
+            (List.mapi(renderComment, self.state.commentList) |> Array.of_list |> ReasonReact.arrayToElement)
           </div>
         </div>
       </div>
