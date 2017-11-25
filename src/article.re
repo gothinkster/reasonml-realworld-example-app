@@ -17,16 +17,9 @@ type state = {
   commentList: list(comment)
 };
 
-/* type commentAuthor = {
-  username: string,
-  bio: option(string),
-  image: option(string),
-  following: bool
-}; */
-
 type action =
   | AddComment
-  | DeleteComment
+  | DeleteComment(comment)
   | FetchComments(list(comment));
 
 let show = ReasonReact.stringToElement;
@@ -46,7 +39,6 @@ let renderComment = (index, comment) => {
       <a href="" className="comment-author"> (show(comment.author.username)) </a>
       <span className="date-posted"> (show(Js.Date.fromString(comment.createdAt) |> Js.Date.toDateString)) </span>
       <span className="mod-options">
-        <i className="ion-edit" />
         <i className="ion-trash-a" />
       </span>
     </div>
@@ -78,18 +70,16 @@ let make = (~router, ~article, _children) => {
   reducer: (action, state) =>
     switch action {
       | AddComment => ReasonReact.NoUpdate
-      | DeleteComment => ReasonReact.NoUpdate
+      | DeleteComment(_currentComment) => ReasonReact.NoUpdate
       | FetchComments(comments) => ReasonReact.Update({...state, commentList: comments})
     },
   didMount: (self) => {
     let reduceComments = (_status, jsonPayload) => {
       jsonPayload |> Js.Promise.then_((result) => {
-        Js.log(result);
         let parsedComments = Js.Json.parseExn(result);
         let commentList = Json.Decode.{
           comments: parsedComments |> field("comments", list(decodeComment))
         };
-        Js.log(commentList);
         self.reduce((_) => FetchComments(commentList.comments), ());
         result |> Js.Promise.resolve
       })
