@@ -8,6 +8,7 @@ type urlMap =
   | Profile(string)
   | Follow(string)
   | Unfollow(string)
+  | DeleteComment(string, int)
   | Articles
   | ArticleBySlug(string)
   | ArticleCommentBySlug(string)
@@ -29,6 +30,7 @@ let mapUrl = (url) =>
   | Articles => "/articles"
   | ArticleBySlug(slug) => "/articles/" ++ slug
   | ArticleCommentBySlug(slug) => "/articles/" ++ (slug ++ "/comments")
+  | DeleteComment(slug, commentId) => "/articles/" ++ slug ++ "/comments/" ++ string_of_int(commentId)
   | ArticleBySlugId((slug, id)) => "/articles/" ++ (slug ++ ("/comments/" ++ id))
   | Feed => "/articles/feed"
   | ArticleFavorite(slug)

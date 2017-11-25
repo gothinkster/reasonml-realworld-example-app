@@ -19,12 +19,12 @@ type state = {
 
 type action =
   | AddComment
-  | DeleteComment(comment)
+  | DeleteComment(int)
   | FetchComments(list(comment));
 
 let show = ReasonReact.stringToElement;
 let component = ReasonReact.reducerComponent("Article");
-let renderComment = (index, comment) => {
+let renderComment = (reduce, index, comment) => {
   <div className="card" key=(string_of_int(index))>
     <div className="card-block">
       <p className="card-text">
@@ -39,10 +39,14 @@ let renderComment = (index, comment) => {
       <a href="" className="comment-author"> (show(comment.author.username)) </a>
       <span className="date-posted"> (show(Js.Date.fromString(comment.createdAt) |> Js.Date.toDateString)) </span>
       <span className="mod-options">
-        <i className="ion-trash-a" />
+        <i className="ion-trash-a" onClick=(reduce((_event) => DeleteComment(comment.id)))/>
       </span>
     </div>
   </div>
+};
+
+let deleteCommentRequest = (id, slug) => { 
+  JsonRequests.deleteCommentForArticle(slug, id, Effects.getTokenFromStorage()) |> ignore;
 };
 
 let decodeAuthor = (json) => {
@@ -70,7 +74,10 @@ let make = (~router, ~article, _children) => {
   reducer: (action, state) =>
     switch action {
       | AddComment => ReasonReact.NoUpdate
-      | DeleteComment(_currentComment) => ReasonReact.NoUpdate
+      | DeleteComment(commentId) => {
+        let commentsWithout = List.filter((comment) => comment.id != commentId, state.commentList);
+        ReasonReact.UpdateWithSideEffects({...state, commentList: commentsWithout}, (_self) => deleteCommentRequest(commentId, state.slug))
+      }
       | FetchComments(comments) => ReasonReact.Update({...state, commentList: comments})
     },
   didMount: (self) => {
@@ -156,7 +163,7 @@ let make = (~router, ~article, _children) => {
                 <button className="btn btn-sm btn-primary"> (show("Post Comment")) </button>
               </div>
             </form>
-            (List.mapi(renderComment, self.state.commentList) |> Array.of_list |> ReasonReact.arrayToElement)
+            {List.mapi(renderComment(self.reduce), self.state.commentList) |> Array.of_list |> ReasonReact.arrayToElement}
           </div>
         </div>
       </div>

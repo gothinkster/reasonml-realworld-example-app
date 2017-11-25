@@ -181,3 +181,8 @@ let submitNewArticle = (submissionResponse, jsonData, token) => {
 let commentsForArticle = (slug, commentsFunc) => {
   sendRequest(Get, None, None, commentsFunc, (constructUrl(Config.ArticleCommentBySlug(slug))))
 };
+
+let deleteCommentForArticle = (slug, commentId, token) => {
+  let mutedResponse = (_,_) => ();
+  sendRequest(Delete, token, None, mutedResponse, (constructUrl(Config.DeleteComment(slug, commentId))))
+};
