@@ -14,6 +14,30 @@ let goToHome = (router, routeName, event) => navigateTo(router, event, routeName
 let goToSettings = (router, routeName, event) => navigateTo(router, event, routeName);
 let goToCreateArticle = (router, routeName, event) => navigateTo(router, event, routeName);
 
+let displayUsername = () => {
+  let (optionalName, _) = Effects.getUserFromStorage();
+  switch optionalName {
+    | Some(name) => name
+    | None => "Username Missing"
+  };
+};
+
+/* This really should be in a reducer component since we are doing a side effect here. */
+let displayByLogin = (router) => {  
+  switch (Effects.getTokenFromStorage()) {
+    | Some(_token) => {
+      <a className="nav-link" style=(pointerStyle()) href="#" onClick=(goToRegistration(router, "/profile"))>
+        (show(displayUsername()))
+      </a>
+    }
+    | None => {
+      <a className="nav-link" style=(pointerStyle()) href="#" onClick=(goToRegistration(router, "/register"))>
+      (show("Sign up"))
+    </a>
+    }
+  };
+};
+
 let make = (~router, _children) => {
   ...component, /* spread the template's other defaults into here  */
   render: (_self) =>
@@ -40,9 +64,7 @@ let make = (~router, _children) => {
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" style=(pointerStyle()) href="#" onClick=(goToRegistration(router, "/register"))>
-                (show("Sign up"))
-              </a>
+              {displayByLogin(router)}
             </li>
           </ul>
         </div>
