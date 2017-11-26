@@ -182,7 +182,17 @@ let commentsForArticle = (slug, commentsFunc) => {
   sendRequest(Get, None, None, commentsFunc, (constructUrl(Config.ArticleCommentBySlug(slug))))
 };
 
+let mutedResponse = (_,_) => ();
+
 let deleteCommentForArticle = (slug, commentId, token) => {
-  let mutedResponse = (_,_) => ();
   sendRequest(Delete, token, None, mutedResponse, (constructUrl(Config.DeleteComment(slug, commentId))))
+};
+
+let followUser = (username, token) => {
+  /* Using a muted response even though it returns a profile. It might be needed later */
+  sendRequest(Post, token, None, mutedResponse, (constructUrl(Config.Follow(username))))
+};
+
+let unFollowUser = (username, token) => {
+  sendRequest(Delete, token, None, mutedResponse, (constructUrl(Config.Unfollow(username))))
 };

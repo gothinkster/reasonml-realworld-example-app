@@ -15,7 +15,8 @@ type commentList = {
 type state = {
   slug: string,
   commentList: list(comment),
-  articleBody: string
+  articleBody: string,
+  isFollowing: bool
 };
 
 let displayImage =
@@ -27,6 +28,7 @@ type action =
   | AddComment
   | DeleteComment(int)
   | FollowUser(string)
+  | UnFollowUser(string)
   | FetchComments(list(comment));
 
 let show = ReasonReact.stringToElement;
@@ -52,9 +54,14 @@ let renderComment = (reduce, index, comment) => {
   </div>
 };
 
-let deleteCommentRequest = (id, slug) => {
+let deleteCommentRequest = (id, slug) => 
   JsonRequests.deleteCommentForArticle(slug, id, Effects.getTokenFromStorage()) |> ignore;
-};
+
+let followUserRequest = (username) => 
+  JsonRequests.followUser(username, Effects.getTokenFromStorage()) |> ignore;
+
+let unFollowUserRequest = (username) => 
+  JsonRequests.unFollowUser(username, Effects.getTokenFromStorage()) |> ignore;
 
 let decodeAuthor = (json) => {
   Json.Decode.{
@@ -75,8 +82,10 @@ let decodeComment = (json) => {
   };
 };
 
-let followUser = (event) =>   
-  FollowUser(ReactDOMRe.domElementToObj(ReactEventRe.Mouse.target(event))##value);
+let followUser = (isFollowing, event) =>   
+  isFollowing ? 
+    UnFollowUser(ReactDOMRe.domElementToObj(ReactEventRe.Mouse.target(event))##value):
+    FollowUser(ReactDOMRe.domElementToObj(ReactEventRe.Mouse.target(event))##value);
 
 /* Add markdown parser to display properly
  */
@@ -86,7 +95,7 @@ let dangerousHtml : string => Js.t('a) = html => {
 
 let make = (~router, ~article, _children) => {
   ...component,
-  initialState: () => {slug: article.slug, commentList: [], articleBody: article.body},
+  initialState: () => {slug: article.slug, commentList: [], articleBody: article.body, isFollowing: article.author.following},
   reducer: (action, state) =>
     switch action {
       | AddComment => ReasonReact.NoUpdate
@@ -95,7 +104,8 @@ let make = (~router, ~article, _children) => {
         ReasonReact.UpdateWithSideEffects({...state, commentList: commentsWithout}, (_self) => deleteCommentRequest(commentId, state.slug))
       }
       | FetchComments(comments) => ReasonReact.Update({...state, commentList: comments})
-      | FollowUser(username) => ReasonReact.SideEffects((_) => Js.log({j|Current username: $username|j}))
+      | FollowUser(username) => ReasonReact.UpdateWithSideEffects({...state, isFollowing: true}, (_self) => followUserRequest(username))
+      | UnFollowUser(username) => ReasonReact.UpdateWithSideEffects({...state, isFollowing: false}, (_self) => unFollowUserRequest(username))
     },
   didMount: (self) => {
     let reduceComments = (_status, jsonPayload) => {
@@ -123,10 +133,10 @@ let make = (~router, ~article, _children) => {
               <a href="" className="author" > (show(article.author.username)) </a>
               <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
             </div>
-            <button className="btn btn-sm btn-outline-secondary" value=(article.author.username) onClick=(self.reduce(followUser))>
+            <button className="btn btn-sm btn-outline-secondary" value=(article.author.username) onClick=(self.reduce(followUser(self.state.isFollowing)))>
               <i className="ion-plus-round" />
               (show(" "))
-              (show(article.author.username))
+              (show((self.state.isFollowing ? "unfollow " : "follow ") ++ article.author.username))
               <span className="counter"> (show("(10)")) </span>
             </button>
             (ReasonReact.stringToElement("  "))
@@ -153,10 +163,10 @@ let make = (~router, ~article, _children) => {
               <a href="" className="author"> (show(article.author.username)) </a>
               <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
             </div>
-            <button className="btn btn-sm btn-outline-secondary">
+            <button className="btn btn-sm btn-outline-secondary" value=(article.author.username) onClick=(self.reduce(followUser(self.state.isFollowing)))>
               <i className="ion-plus-round" />
               (show(" "))
-              (show(article.author.username))
+              (show((self.state.isFollowing ? "unfollow " : "follow ") ++ article.author.username))
               <span className="counter"> (show("(0)")) </span>
             </button>
             (show(" "))
