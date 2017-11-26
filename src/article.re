@@ -14,12 +14,19 @@ type commentList = {
 
 type state = {
   slug: string,
-  commentList: list(comment)
+  commentList: list(comment),
+  articleBody: string
 };
+
+let displayImage =
+  fun
+  | Some(image) => image
+  | None => "";
 
 type action =
   | AddComment
   | DeleteComment(int)
+  | FollowUser(string)
   | FetchComments(list(comment));
 
 let show = ReasonReact.stringToElement;
@@ -33,7 +40,7 @@ let renderComment = (reduce, index, comment) => {
     </div>
     <div className="card-footer">
       <a href="" className="comment-author">
-        <img src="http://i.imgur.com/Qr71crq.jpg" className="comment-author-img" />
+        <img src=(displayImage(comment.author.image)) className="comment-author-img" />
       </a>
       (show(" "))
       <a href="" className="comment-author"> (show(comment.author.username)) </a>
@@ -45,7 +52,7 @@ let renderComment = (reduce, index, comment) => {
   </div>
 };
 
-let deleteCommentRequest = (id, slug) => { 
+let deleteCommentRequest = (id, slug) => {
   JsonRequests.deleteCommentForArticle(slug, id, Effects.getTokenFromStorage()) |> ignore;
 };
 
@@ -68,9 +75,18 @@ let decodeComment = (json) => {
   };
 };
 
+let followUser = (event) =>   
+  FollowUser(ReactDOMRe.domElementToObj(ReactEventRe.Mouse.target(event))##value);
+
+/* Add markdown parser to display properly
+ */
+let dangerousHtml : string => Js.t('a) = html => {
+  "__html": html
+};
+
 let make = (~router, ~article, _children) => {
   ...component,
-  initialState: () => {slug: article.slug, commentList: []},
+  initialState: () => {slug: article.slug, commentList: [], articleBody: article.body},
   reducer: (action, state) =>
     switch action {
       | AddComment => ReasonReact.NoUpdate
@@ -79,6 +95,7 @@ let make = (~router, ~article, _children) => {
         ReasonReact.UpdateWithSideEffects({...state, commentList: commentsWithout}, (_self) => deleteCommentRequest(commentId, state.slug))
       }
       | FetchComments(comments) => ReasonReact.Update({...state, commentList: comments})
+      | FollowUser(username) => ReasonReact.SideEffects((_) => Js.log({j|Current username: $username|j}))
     },
   didMount: (self) => {
     let reduceComments = (_status, jsonPayload) => {
@@ -91,21 +108,22 @@ let make = (~router, ~article, _children) => {
         result |> Js.Promise.resolve
       })
     };
+
     JsonRequests.commentsForArticle(self.state.slug, reduceComments) |> ignore;
     ReasonReact.NoUpdate
   },
-  render: (self) =>
+  render: (self) => {
     <div className="article-page">
       <div className="banner">
         <div className="container">
           <h1> (show(article.title)) </h1>
           <div className="article-meta">
-            <a href=""> <img src="http://i.imgur.com/Qr71crq.jpg" /> </a>
+            <a href=""> <img src=(displayImage(article.author.image)) /> </a>
             <div className="info">
-              <a href="" className="author"> (show(article.author.username)) </a>
+              <a href="" className="author" > (show(article.author.username)) </a>
               <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
             </div>
-            <button className="btn btn-sm btn-outline-secondary">
+            <button className="btn btn-sm btn-outline-secondary" value=(article.author.username) onClick=(self.reduce(followUser))>
               <i className="ion-plus-round" />
               (show(" "))
               (show(article.author.username))
@@ -123,16 +141,14 @@ let make = (~router, ~article, _children) => {
       </div>
       <div className="container page">
         <div className="row article-content">
-          <div className="col-md-12">
-            <p>
-              (show(article.body))
-            </p>
+          <div className="col-md-12" >
+            <div dangerouslySetInnerHTML=(dangerousHtml(article.body)) />
           </div>
         </div>
         <hr />
         <div className="article-actions">
           <div className="article-meta">
-            <a href="profile.html"> <img src="http://i.imgur.com/Qr71crq.jpg" /> </a>
+            <a href="profile.html"> <img src=(displayImage(article.author.image))/> </a>
             <div className="info">
               <a href="" className="author"> (show(article.author.username)) </a>
               <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
@@ -168,4 +184,5 @@ let make = (~router, ~article, _children) => {
         </div>
       </div>
     </div>
+  }
 };
