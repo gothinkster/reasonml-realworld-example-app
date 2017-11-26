@@ -196,3 +196,7 @@ let followUser = (username, token) => {
 let unFollowUser = (username, token) => {
   sendRequest(Delete, token, None, mutedResponse, (constructUrl(Config.Unfollow(username))))
 };
+
+let getFeed = (token, articleListFunc) => {
+  sendRequest(Get, token, None, articleListFunc, (constructUrl(Config.Feed)))
+};

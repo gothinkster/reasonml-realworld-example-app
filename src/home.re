@@ -9,7 +9,8 @@ type action =
   | TagsFetched(array(string))
   | ShowMyFeed
   | ShowGlobalFeed
-  | ArticlesFetched(articleList);
+  | ArticlesFetched(articleList)
+  | MyArticlesFetched(articleList);
 
 type state = {
   myFeedDisplay: ReactDOMRe.style,
@@ -69,26 +70,34 @@ let populateTags = (reduce) => {
   JsonRequests.getPoplarTags(reduceTags) |> ignore;
 };
 
+let reduceFeed = (reduceToAction, _state, jsonPayload) => {
+  jsonPayload |> Js.Promise.then_((result) => {
+    let parsedArticles = Js.Json.parseExn(result);
+    Js.log(parsedArticles);
+    let articleList = Json.Decode.{
+      articles: parsedArticles |> field("articles", array(decodeArticles)),
+      articlesCount: parsedArticles |> field("articlesCount", int)
+    };
+    
+    reduceToAction(articleList);
+    articleList |> Js.Promise.resolve
+  })
+};
+
 let populateGlobalFeed = (reduce) => {
-  let reduceFeed = (_state, jsonPayload) => {
-    jsonPayload |> Js.Promise.then_((result) => {
-      let parsedArticles = Js.Json.parseExn(result);
-      Js.log(parsedArticles);
-      let articleList = Json.Decode.{
-        articles: parsedArticles |> field("articles", array(decodeArticles)),
-        articlesCount: parsedArticles |> field("articlesCount", int)
-      };
-      
-      reduce((_) => ArticlesFetched(articleList), ());
-      articleList |> Js.Promise.resolve
-    })
-  };
+  let reduceFunc = (articleList) => reduce((_) => ArticlesFetched(articleList), ());
   /* Get the right page if there are more than 10 articles */
-  JsonRequests.getGlobalArticles(reduceFeed, Effects.getTokenFromStorage(), 10, 0) |> ignore;
+  JsonRequests.getGlobalArticles(reduceFeed(reduceFunc), Effects.getTokenFromStorage(), 10, 0) |> ignore;
+};
+
+let populateFeed = (reduce) => {
+  let reduceFunc = (articleList) => reduce((_) => MyArticlesFetched(articleList), ());
+  JsonRequests.getFeed(Effects.getTokenFromStorage(), reduceFeed(reduceFunc)) |> ignore
 };
 
 let showMyFeed = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
+  populateFeed(reduce);
   reduce((_) => ShowMyFeed,());
 };
 
@@ -159,6 +168,11 @@ let make = (~articleCallback, ~router, _children) => {
       articles: articleList.articles,
       articleCount: articleList.articlesCount
     })
+    | MyArticlesFetched(articleList) => ReasonReact.Update({
+      ...state,
+      articles: articleList.articles,
+      articleCount: articleList.articlesCount
+    })
     },
   didMount: (self) => {
     populateTags(self.reduce);
@@ -188,25 +202,10 @@ let make = (~articleCallback, ~router, _children) => {
               </ul>
             </div>
             <div className="article-preview" style=(state.myFeedDisplay)>
-              <div className="article-meta">
-                <a href="profile.html" />
-                <div className="info">
-                  <a href="" className="author"> (show("Eric Simons")) </a>
-                  <span className="date"> (show("January 20th")) </span>
-                </div>
-                <button className="btn btn-outline-primary btn-sm pull-xs-right">
-                  <i className="ion-heart" />
-                  (show("29"))
-                </button>
-              </div>
-              <a href="" className="preview-link">
-                <h1> (show("How to build webapps that scale")) </h1>
-                <p> (show("This is the description for the post.")) </p>
-                <span> (show("Read more...")) </span>
-              </a>
+              {Array.mapi(renderArticle(self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
             </div>
             <div style=(state.globalFeedDisplay)>
-              (Array.mapi(renderArticle(self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement)
+              {Array.mapi(renderArticle(self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
             </div>
           </div>
           <div className="col-md-3">
