@@ -53,7 +53,7 @@ let make = (~route, ~router, _children) => {
       | Routes.Article => <Article router article />
       | Routes.CreateArticle => <CreateArticle router />
       | Routes.EditArticle => <Article router article />
-      | Routes.Profile => <Profile />
+      | Routes.Profile => <Profile articleCallback=articleCallback(reduce) router />
       };
     <div> <Header router /> <div> (route |> select_subpage) </div> <Footer /> </div>
   }
