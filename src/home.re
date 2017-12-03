@@ -73,7 +73,7 @@ let populateTags = (reduce) => {
 let reduceFeed = (reduceToAction, _state, jsonPayload) => {
   jsonPayload |> Js.Promise.then_((result) => {
     let parsedArticles = Js.Json.parseExn(result);
-    Js.log(parsedArticles);
+    
     let articleList = Json.Decode.{
       articles: parsedArticles |> field("articles", array(decodeArticles)),
       articlesCount: parsedArticles |> field("articlesCount", int)

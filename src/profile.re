@@ -3,8 +3,8 @@ open Models;
 let show = ReasonReact.stringToElement;
 
 type state = {
-  myArticles: list(article),
-  favoriteArticles: list(article),
+  myArticles: array(article),
+  favoriteArticles: array(article),
   showMyArticles: bool,
   showFavArticle: bool,
   username: string,
@@ -15,8 +15,8 @@ type state = {
 };
 
 let initialState = {
-  myArticles: [],
-  favoriteArticles:[],
+  myArticles: [||],
+  favoriteArticles:[||],
   showMyArticles: true,
   showFavArticle: false,
   username: "",
@@ -27,28 +27,13 @@ let initialState = {
 };
 
 type action =
-  | MyArticles (list(article))
-  | FavoriteArticle (list(string))
-  | PendingArticle
+  | MyArticles (array(article))
+  | FavoriteArticle (array(article))
   | NoData
+  | PendingMyArticles
+  | PendingFavoriteArticles
   | CurrentUserFetched ((string, string));
 
-let clickMyArticles = (event, {ReasonReact.state, reduce}) => {
-  ReactEventRe.Mouse.preventDefault(event);
-  Js.log("Articles were clicked.");
-  /* This will be in the promise */
-  reduce((_) => MyArticles([]),());
-
-  reduce((_) => PendingArticle, ())
-};
-
-let clickMyFavorites = (event, {ReasonReact.state, reduce}) => {
-  ReactEventRe.Mouse.preventDefault(event);
-  /* This will be in the promise */
-  reduce((_) => FavoriteArticle([]),());
-
-  reduce((_) => PendingArticle, ())
-};
 
 let getDefaultFieldFor = (fieldName) =>
   switch fieldName {
@@ -58,29 +43,64 @@ let getDefaultFieldFor = (fieldName) =>
 
   let decodeAuthor = (json) =>
   Json.Decode.{
-    username: json |> field("username", string), 
+    username: json |> field("username", string),
     bio: json |> optional(field("bio", string)),
-    image: json |> optional(field("image", string)), 
+    image: json |> optional(field("image", string)),
     following: json |> field("following", bool)
   };
 
-let extractArticleList = (jsonArticles: Js.Json.t) => {  
+let extractArticleList = (jsonArticles: Js.Json.t) => {
   let parseArticle = (rawArticle) =>
     Json.Decode.{
       slug: rawArticle |> field("slug", string),
       title: rawArticle |> field("title", string),
       description: rawArticle |> field("description", string),
       body: rawArticle |> field("body", string),
-      tagList: [||], 
+      tagList: [||],
       createdAt: rawArticle |> field("createdAt", string),
-      updatedAt: rawArticle |> field("updatedAt", string), 
+      updatedAt: rawArticle |> field("updatedAt", string),
       favorited: rawArticle |> field("favorited", bool),
-      favoritesCount: rawArticle |> field("favoritesCount", int), 
+      favoritesCount: rawArticle |> field("favoritesCount", int),
       author: rawArticle |> field("author", decodeAuthor)
-      
+
     };
-  Json.Decode.(jsonArticles |> field("articles", list(parseArticle)));
+  Json.Decode.(jsonArticles |> field("articles", array(parseArticle)));
 };
+
+let reduceMyArtcles = (reduceFunc, _status, payload) => {
+  payload |> Js.Promise.then_((result) => {
+    let parsedArticles = Js.Json.parseExn(result);
+
+    let articleList = Json.Decode.{
+      articles: parsedArticles |> extractArticleList,
+      articlesCount: parsedArticles |> field("articlesCount", int)
+    };
+    reduceFunc(articleList.articles);
+    
+    articleList |> Js.Promise.resolve;
+  });
+
+};
+
+let clickMyArticles = (event, {ReasonReact.state, reduce}) => {
+  ReactEventRe.Mouse.preventDefault(event);
+  let reduceFunc = (articles) => reduce((_) => MyArticles(articles),());
+  
+  JsonRequests.getMyArticles(reduceMyArtcles(reduceFunc), state.username, Effects.getTokenFromStorage()) 
+  |> ignore;
+
+  reduce((_) => PendingMyArticles, ())
+};
+
+let clickMyFavorites = (event, {ReasonReact.state, reduce}) => {
+  ReactEventRe.Mouse.preventDefault(event);
+  let reduceFunc = (articles) => reduce((_) => FavoriteArticle(articles),());
+  JsonRequests.getFavoritedArticles(reduceMyArtcles(reduceFunc), state.username, Effects.getTokenFromStorage())
+  |> ignore;  
+
+  reduce((_) => PendingFavoriteArticles, ())
+};
+
 
 /* side effect */
 let reduceByAuthArticles = ({ReasonReact.state, reduce}, _status, jsonPayload) =>  {
@@ -128,7 +148,6 @@ let renderArticle = (handle, router, articleCallback, index, article) =>
     </div>
   </div>;
 
-
 let component = ReasonReact.reducerComponent("Profile");
 let make = (~articleCallback, ~router, _children) => {
   ...component,
@@ -141,14 +160,16 @@ let make = (~articleCallback, ~router, _children) => {
       isFavArticleDisplay: ReactDOMRe.Style.make(~display="none", ()),
       myArticles: articleList
     })
-    | FavoriteArticle(_articleList) => ReasonReact.Update({
+    | FavoriteArticle(articleList) => ReasonReact.Update({
       ...state,
       isMyArticleDisplay: ReactDOMRe.Style.make(~display="none", ()),
-      isFavArticleDisplay: ReactDOMRe.Style.make(~display="block", ())
+      isFavArticleDisplay: ReactDOMRe.Style.make(~display="block", ()),
+      favoriteArticles: articleList
     })
     | CurrentUserFetched ((username, bio)) => ReasonReact.Update({ ...state, username: username, bio: bio })
-    | PendingArticle => ReasonReact.NoUpdate
     | NoData => ReasonReact.NoUpdate
+    | PendingFavoriteArticles => ReasonReact.NoUpdate
+    | PendingMyArticles => ReasonReact.NoUpdate
     },
   didMount: (self) => {
     let (username, bio) = Effects.getUserFromStorage();
@@ -197,10 +218,10 @@ let make = (~articleCallback, ~router, _children) => {
               </ul>
             </div>
             <div className="article-preview" style=(state.isMyArticleDisplay)>
-              {List.mapi(renderArticle(self.handle, router, articleCallback), state.myArticles) |> Array.of_list |>  ReasonReact.arrayToElement}
+              {Array.mapi(renderArticle(self.handle, router, articleCallback), state.myArticles) |>  ReasonReact.arrayToElement}
             </div>
             <div className="article-preview" style=(state.isFavArticleDisplay)>
-
+              {Array.mapi(renderArticle(self.handle, router, articleCallback), state.favoriteArticles) |>  ReasonReact.arrayToElement}
             </div>
           </div>
         </div>
