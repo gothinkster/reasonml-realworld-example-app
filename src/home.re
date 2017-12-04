@@ -243,7 +243,7 @@ let make = (~articleCallback, ~router, _children) => {
                 </li>
               </ul>
             </div>
-            <div className="article-preview" style=(state.myFeedDisplay)>
+            <div style=(state.myFeedDisplay)>
               {Array.mapi(renderArticle(self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
             </div>
             <div style=(state.globalFeedDisplay)>
