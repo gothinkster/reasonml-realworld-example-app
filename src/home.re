@@ -108,25 +108,25 @@ let populateFeed = (reduce) => {
   JsonRequests.getFeed(Effects.getTokenFromStorage(), reduceFeed(reduceFunc)) |> ignore
 };
 
-let showMyFeed = (event, {ReasonReact.state, reduce}) => {
+let showMyFeed = (event, {ReasonReact.state: _state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
   populateFeed(reduce);
   reduce((_) => ShowMyFeed,());
 };
 
-let showGlobalFeed = (event, {ReasonReact.state, reduce}) => {
+let showGlobalFeed = (event, {ReasonReact.state: _state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
   populateGlobalFeed(reduce);
   reduce((_) => ShowGlobalFeed,());
 };
 
-let goToArticle = (router, articleCallback, article, event, {ReasonReact.state}) => {
+let goToArticle = (router, articleCallback, article, event, {ReasonReact.state: _state}) => {
   ReactEventRe.Mouse.preventDefault(event);
   articleCallback(article);
   DirectorRe.setRoute(router,"/article")
 };
 
-let renderTag = ({ReasonReact.state, reduce}, index, tag) => {
+let renderTag = ({ReasonReact.state: _state, reduce}, index, tag) => {
   <a onClick=(reduce(showTaggedArticles)) href="#" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
 };
 
