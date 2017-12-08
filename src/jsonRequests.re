@@ -200,3 +200,7 @@ let unFollowUser = (username, token) => {
 let getFeed = (token, articleListFunc) => {
   sendRequest(Get, token, None, articleListFunc, (constructUrl(Config.Feed)))
 };
+
+let favoriteArticle = (token, slug) => {
+  sendRequest(Post, token, None, mutedResponse, (constructUrl(Config.ArticleFavorite(slug))));
+};
