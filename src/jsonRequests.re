@@ -212,5 +212,5 @@ let getFeed = (token, articleListFunc) => {
 };
 
 let favoriteArticle = (token, slug) => {
-  sendRequest(Post, token, None, mutedResponse, (constructUrl(Config.ArticleFavorite(slug))));
+  sendRequest(Post, token, None, mutedResponse, (constructUrl(Config.ArticleFavorite(slug))))
 };
