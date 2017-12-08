@@ -10,38 +10,51 @@ type action =
   | ShowMyFeed
   | ShowGlobalFeed
   | ArticlesFetched(articleList)
-  | MyArticlesFetched(articleList);
+  | MyArticlesFetched(articleList)
+  | TagArticlesFetched(articleList)
+  | ShowTagList(string);
 
 type state = {
   myFeedDisplay: ReactDOMRe.style,
   globalFeedDisplay: ReactDOMRe.style,
+  tagFeedDisplay: ReactDOMRe.style,
   myFeedActiveClass: string,
   globalfeedActiveClass: string,
+  tagFeedActiveClass: string,
   tags: array(string),
   articles: array(article),
-  articleCount: int
+  articleCount: int,
+  showTagTab: bool,
+  currentTagName: string
 };
 
 let initialState = () => {
   tags: [||],
   myFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
   globalFeedDisplay: ReactDOMRe.Style.make(~display="block", ()),
+  tagFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
   myFeedActiveClass: "nav-link disabled",
   globalfeedActiveClass: "nav-link active",
+  tagFeedActiveClass: "nav-link disabled",
   articles: [||],
-  articleCount: 0
+  articleCount: 0,
+  showTagTab: false,
+  currentTagName: ""
 };
+
+let showTaggedArticles = (event) =>
+  ShowTagList(ReactDOMRe.domElementToObj(ReactEventRe.Mouse.target(event))##innerText);
 
 /* article page uses this decoder as well */
 let decodeAuthor = (json) =>
   Json.Decode.{
-    username: json |> field("username", string), 
+    username: json |> field("username", string),
     bio: json |> optional(field("bio", string)),
-    image: json |> optional(field("image", string)), 
+    image: json |> optional(field("image", string)),
     following: json |> field("following", bool)
   };
 
-let decodeArticles = (json) => {  
+let decodeArticles = (json) => {
   Json.Decode.{
     slug: json |> field("slug", string),
     title: json |> field("title", string),
@@ -49,9 +62,9 @@ let decodeArticles = (json) => {
     body: json |> field("body", string),
     tagList: [||], /* json |> field("tagList", array(string)) */
     createdAt: json |> field("createdAt", string),
-    updatedAt: json |> field("updatedAt", string), 
+    updatedAt: json |> field("updatedAt", string),
     favorited: json |> field("favorited", bool),
-    favoritesCount: json |> field("favoritesCount", int), 
+    favoritesCount: json |> field("favoritesCount", int),
     author: json |> field("author", decodeAuthor)
   };
 };
@@ -73,12 +86,12 @@ let populateTags = (reduce) => {
 let reduceFeed = (reduceToAction, _state, jsonPayload) => {
   jsonPayload |> Js.Promise.then_((result) => {
     let parsedArticles = Js.Json.parseExn(result);
-    Js.log(parsedArticles);
+
     let articleList = Json.Decode.{
       articles: parsedArticles |> field("articles", array(decodeArticles)),
       articlesCount: parsedArticles |> field("articlesCount", int)
     };
-    
+
     reduceToAction(articleList);
     articleList |> Js.Promise.resolve
   })
@@ -95,26 +108,26 @@ let populateFeed = (reduce) => {
   JsonRequests.getFeed(Effects.getTokenFromStorage(), reduceFeed(reduceFunc)) |> ignore
 };
 
-let showMyFeed = (event, {ReasonReact.state, reduce}) => {
+let showMyFeed = (event, {ReasonReact.state: _state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
   populateFeed(reduce);
   reduce((_) => ShowMyFeed,());
 };
 
-let showGlobalFeed = (event, {ReasonReact.state, reduce}) => {
+let showGlobalFeed = (event, {ReasonReact.state: _state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
   populateGlobalFeed(reduce);
   reduce((_) => ShowGlobalFeed,());
 };
 
-let goToArticle = (router, articleCallback, article, event, {ReasonReact.state}) => {
+let goToArticle = (router, articleCallback, article, event, {ReasonReact.state: _state}) => {
   ReactEventRe.Mouse.preventDefault(event);
   articleCallback(article);
   DirectorRe.setRoute(router,"/article")
 };
 
-let renderTag = (index, tag) => {
-  <a href="" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
+let renderTag = ({ReasonReact.state: _state, reduce}, index, tag) => {
+  <a onClick=(reduce(showTaggedArticles)) href="#" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
 };
 
 let renderArticle = (handle, router, articleCallback, index, article) =>
@@ -153,25 +166,50 @@ let make = (~articleCallback, ~router, _children) => {
       ...state,
       myFeedDisplay: ReactDOMRe.Style.make(~display="block", ()),
       globalFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
+      tagFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
       myFeedActiveClass: "nav-link active",
-      globalfeedActiveClass: "nav-link disabled"
+      globalfeedActiveClass: "nav-link disabled",
+      tagFeedActiveClass: "nav-link disabled"
     })
     | ShowGlobalFeed => ReasonReact.Update({
       ...state,
       myFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
       globalFeedDisplay: ReactDOMRe.Style.make(~display="block", ()),
+      tagFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
       myFeedActiveClass: "nav-link disabled",
-      globalfeedActiveClass: "nav-link active"
+      globalfeedActiveClass: "nav-link active",
+      tagFeedActiveClass: "nav-link disabled"
     })
     | ArticlesFetched(articleList) => ReasonReact.Update({
       ...state,
       articles: articleList.articles,
-      articleCount: articleList.articlesCount
+      articleCount: articleList.articlesCount,
+      tagFeedDisplay: ReactDOMRe.Style.make(~display="none", ())
     })
     | MyArticlesFetched(articleList) => ReasonReact.Update({
       ...state,
       articles: articleList.articles,
       articleCount: articleList.articlesCount
+    })
+    | TagArticlesFetched(articleList) => ReasonReact.Update({
+      ...state,
+      articles: articleList.articles,
+      myFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
+      globalFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
+      tagFeedDisplay: ReactDOMRe.Style.make(~display="block", ())
+    })
+    | ShowTagList(currentTagName) => ReasonReact.UpdateWithSideEffects({
+      ...state,
+      currentTagName: currentTagName,
+      myFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
+      globalFeedDisplay: ReactDOMRe.Style.make(~display="none", ()),
+      tagFeedDisplay: ReactDOMRe.Style.make(~display="block", ()),
+      myFeedActiveClass: "nav-link disabled",
+      globalfeedActiveClass: "nav-link disabled",
+      tagFeedActiveClass: "nav-link active"
+    }, (self) => {
+      let reduceFunc = (articleList) => self.reduce((_) => TagArticlesFetched(articleList), ());
+      JsonRequests.getArticlesByTag(reduceFeed(reduceFunc), currentTagName, Effects.getTokenFromStorage()) |> ignore;
     })
     },
   didMount: (self) => {
@@ -181,6 +219,7 @@ let make = (~articleCallback, ~router, _children) => {
   },
   render: (self) => {
     let {ReasonReact.state} = self;
+    let currentTagName = state.currentTagName;
     <div className="home-page">
       <div className="banner">
         <div className="container">
@@ -199,20 +238,26 @@ let make = (~articleCallback, ~router, _children) => {
                 <li className="nav-item">
                   <a className=(state.globalfeedActiveClass) href="#" onClick=(self.handle(showGlobalFeed))> (show("Global Feed")) </a>
                 </li>
+                <li className="nav-item" style=(state.tagFeedDisplay)>
+                  <a  className=(state.tagFeedActiveClass) href="#"> (show({j|#$currentTagName|j} )) </a>
+                </li>
               </ul>
             </div>
-            <div className="article-preview" style=(state.myFeedDisplay)>
+            <div style=(state.myFeedDisplay)>
               {Array.mapi(renderArticle(self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
             </div>
             <div style=(state.globalFeedDisplay)>
+              {Array.mapi(renderArticle(self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
+            </div>
+            <div style=(state.tagFeedDisplay)>
               {Array.mapi(renderArticle(self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
             </div>
           </div>
           <div className="col-md-3">
             <div className="sidebar">
               <p> (show("Popular Tags")) </p>
-              <div className="tag-list">
-                (Array.mapi(renderTag,state.tags) |> ReasonReact.arrayToElement)
+              <div className="tag-list" >
+                (Array.mapi(renderTag(self),state.tags) |> ReasonReact.arrayToElement)
               </div>
             </div>
           </div>
