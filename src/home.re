@@ -12,7 +12,8 @@ type action =
   | ArticlesFetched(articleList)
   | MyArticlesFetched(articleList)
   | TagArticlesFetched(articleList)
-  | ShowTagList(string);
+  | ShowTagList(string)
+  | FavoriteArticle(string);
 
 type state = {
   myFeedDisplay: ReactDOMRe.style,
@@ -25,7 +26,8 @@ type state = {
   articles: array(article),
   articleCount: int,
   showTagTab: bool,
-  currentTagName: string
+  currentTagName: string,
+  favoritedArticleSlug: string
 };
 
 let initialState = () => {
@@ -39,7 +41,8 @@ let initialState = () => {
   articles: [||],
   articleCount: 0,
   showTagTab: false,
-  currentTagName: ""
+  currentTagName: "",
+  favoritedArticleSlug: ""
 };
 
 let showTaggedArticles = (event) =>
@@ -126,11 +129,23 @@ let goToArticle = (router, articleCallback, article, event, {ReasonReact.state: 
   DirectorRe.setRoute(router,"/article")
 };
 
+let updateFavoritedCount = (articles, slug) => {
+  /* let currentArticle = Array.to_list(articles)
+                       |> List.filter((article) => article.slug == slug)
+                       |> List.hd;
+  let articlesWithoutOld = List.filter((article) => { article.slug != slug }, (articles |> Array.to_list));
+  let updateArticle = {...currentArticle, favorited: !currentArticle.favorited };
+  List.append(articlesWithoutOld, [updateArticle]) |> Array.of_list */
+  /* map through the list and update the appropiate article */
+
+  articles
+};
+
 let renderTag = ({ReasonReact.state: _state, reduce}, index, tag) => {
   <a onClick=(reduce(showTaggedArticles)) href="#" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
 };
 
-let renderArticle = (handle, router, articleCallback, index, article) =>
+let renderArticle = ({ReasonReact.state: _state, reduce}, handle, router, articleCallback, index, article) => {
   <div key=(string_of_int(index)) className="article-preview">
     <div>
       <div className="article-meta">
@@ -139,9 +154,9 @@ let renderArticle = (handle, router, articleCallback, index, article) =>
           <a href="" className="author"> (show(article.author.username)) </a>
           <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
         </div>
-        <button className="btn btn-outline-primary btn-sm pull-xs-right">
+        <button className="btn btn-outline-primary btn-sm pull-xs-right" onClick=(reduce((_) => FavoriteArticle(article.slug)))>
           <i className="ion-heart" />
-          (show("0"))
+          (show(string_of_int(article.favoritesCount)))
         </button>
       </div>
       <a href="#" onClick=(handle(goToArticle(router, articleCallback, article))) className="preview-link">
@@ -152,7 +167,8 @@ let renderArticle = (handle, router, articleCallback, index, article) =>
         <span> (show("Read more...")) </span>
       </a>
     </div>
-  </div>;
+  </div>
+};
 
 let component = ReasonReact.reducerComponent("Home");
 
@@ -211,6 +227,13 @@ let make = (~articleCallback, ~router, _children) => {
       let reduceFunc = (articleList) => self.reduce((_) => TagArticlesFetched(articleList), ());
       JsonRequests.getArticlesByTag(reduceFeed(reduceFunc), currentTagName, Effects.getTokenFromStorage()) |> ignore;
     })
+    | FavoriteArticle(slug) => ReasonReact.UpdateWithSideEffects({
+      ...state,
+      articles: updateFavoritedCount(state.articles, slug)
+    }, (_self) => {
+      Js.log(slug);
+      /* JsonRequests.favoriteArticle(Effects.getTokenFromStorage(), slug) |> ignore */
+    })
     },
   didMount: (self) => {
     populateTags(self.reduce);
@@ -244,13 +267,13 @@ let make = (~articleCallback, ~router, _children) => {
               </ul>
             </div>
             <div style=(state.myFeedDisplay)>
-              {Array.mapi(renderArticle(self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
+              {Array.mapi(renderArticle(self, self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
             </div>
             <div style=(state.globalFeedDisplay)>
-              {Array.mapi(renderArticle(self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
+              {Array.mapi(renderArticle(self, self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
             </div>
             <div style=(state.tagFeedDisplay)>
-              {Array.mapi(renderArticle(self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
+              {Array.mapi(renderArticle(self, self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
             </div>
           </div>
           <div className="col-md-3">
