@@ -15,7 +15,7 @@ let goToSettings = (router, routeName, event) => navigateTo(router, event, route
 let goToCreateArticle = (router, routeName, event) => navigateTo(router, event, routeName);
 
 let displayUsername = () => {
-  let (optionalName, _) = Effects.getUserFromStorage();
+  let (optionalName, _, _) = Effects.getUserFromStorage();
   switch optionalName {
     | Some(name) => name
     | None => "Username Missing"

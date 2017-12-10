@@ -9,6 +9,7 @@ type state = {
   showFavArticle: bool,
   username: string,
   bio: string,
+  image: string,
   isMyArticleDisplay: ReactDOMRe.style,
   isFavArticleDisplay: ReactDOMRe.style,
   articles: array(article)
@@ -23,7 +24,8 @@ let initialState = {
   bio: "",
   isMyArticleDisplay: ReactDOMRe.Style.make(~display="block", ()),
   isFavArticleDisplay: ReactDOMRe.Style.make(~display="none", ()),
-  articles: [||]
+  articles: [||],
+  image: ""
 };
 
 type action =
@@ -32,7 +34,7 @@ type action =
   | NoData
   | PendingMyArticles
   | PendingFavoriteArticles
-  | CurrentUserFetched ((string, string));
+  | CurrentUserFetched ((string, string, string));
 
 
 let getDefaultFieldFor = (fieldName) =>
@@ -62,7 +64,6 @@ let extractArticleList = (jsonArticles: Js.Json.t) => {
       favorited: rawArticle |> field("favorited", bool),
       favoritesCount: rawArticle |> field("favoritesCount", int),
       author: rawArticle |> field("author", decodeAuthor)
-
     };
   Json.Decode.(jsonArticles |> field("articles", array(parseArticle)));
 };
@@ -166,20 +167,21 @@ let make = (~articleCallback, ~router, _children) => {
       isFavArticleDisplay: ReactDOMRe.Style.make(~display="block", ()),
       favoriteArticles: articleList
     })
-    | CurrentUserFetched ((username, bio)) => ReasonReact.Update({ ...state, username: username, bio: bio })
+    | CurrentUserFetched ((username, bio, image)) => ReasonReact.Update({ ...state, username: username, bio: bio, image: image })
     | NoData => ReasonReact.NoUpdate
     | PendingFavoriteArticles => ReasonReact.NoUpdate
     | PendingMyArticles => ReasonReact.NoUpdate
     },
   didMount: (self) => {
-    let (username, bio) = Effects.getUserFromStorage();
+    let (username, bio, image) = Effects.getUserFromStorage();
 
     let currentUsername = getDefaultFieldFor(username);
     let currentBio = getDefaultFieldFor(bio);
+    let currentImage = getDefaultFieldFor(image);
     let token = Effects.getTokenFromStorage();
 
     JsonRequests.getMyArticles(reduceByAuthArticles(self), currentUsername, token) |> ignore;
-    self.reduce((_) => CurrentUserFetched((currentUsername, currentBio)), ());
+    self.reduce((_) => CurrentUserFetched((currentUsername, currentBio, currentImage)), ());
     ReasonReact.NoUpdate
   },
   render: (self) => {
@@ -189,7 +191,7 @@ let make = (~articleCallback, ~router, _children) => {
         <div className="container">
           <div className="row">
             <div className="col-xs-12 col-md-10 offset-md-1">
-              <img src={|http://i.imgur.com/Qr71crq.jpg|} className="user-img" />
+              <img src={state.image} className="user-img" />
               <h4> (show(state.username)) </h4>
               <p>
                 (
@@ -217,7 +219,7 @@ let make = (~articleCallback, ~router, _children) => {
                 </li>
               </ul>
             </div>
-            <div className="article-preview" style=(state.isMyArticleDisplay)>
+            <div style=(state.isMyArticleDisplay)>
               {Array.mapi(renderArticle(self.handle, router, articleCallback), state.myArticles) |>  ReasonReact.arrayToElement}
             </div>
             <div className="article-preview" style=(state.isFavArticleDisplay)>
