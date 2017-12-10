@@ -1,4 +1,4 @@
-# RealWorld Reason Example App
+# ![RealWorld Example App](logo.png)
 
 > ### RealWorld ReasonML/React frontend codebase that uses the [RealWorld](https://github.com/gothinkster/realworld-example-apps) API.
 
