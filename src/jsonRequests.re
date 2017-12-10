@@ -214,3 +214,7 @@ let getFeed = (token, articleListFunc) => {
 let favoriteArticle = (token, slug) => {
   sendRequest(Post, token, None, mutedResponse, (constructUrl(Config.ArticleFavorite(slug))))
 };
+
+let unfavoriteArticle = (token, slug) => {
+  sendRequest(Delete, token, None, mutedResponse, (constructUrl(Config.ArticleFavorite(slug))))
+}

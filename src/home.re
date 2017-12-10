@@ -13,7 +13,7 @@ type action =
   | MyArticlesFetched(articleList)
   | TagArticlesFetched(articleList)
   | ShowTagList(string)
-  | FavoriteArticle(string);
+  | FavoriteArticle(string, bool);
 
 type state = {
   myFeedDisplay: ReactDOMRe.style,
@@ -129,16 +129,17 @@ let goToArticle = (router, articleCallback, article, event, {ReasonReact.state: 
   DirectorRe.setRoute(router,"/article")
 };
 
-let updateFavoritedCount = (articles, slug) => {
-  /* let currentArticle = Array.to_list(articles)
-                       |> List.filter((article) => article.slug == slug)
-                       |> List.hd;
-  let articlesWithoutOld = List.filter((article) => { article.slug != slug }, (articles |> Array.to_list));
-  let updateArticle = {...currentArticle, favorited: !currentArticle.favorited };
-  List.append(articlesWithoutOld, [updateArticle]) |> Array.of_list */
-  /* map through the list and update the appropiate article */
-
-  articles
+let updateFavoritedCount = (articles, currentSlug) => {
+  let updateCurrentArticle = (article) => {
+    let incDecFavCount = fun
+    | true => article.favoritesCount + 1
+    | false => article.favoritesCount -1;
+  
+    article.slug == currentSlug ?
+     {...article, favorited: !article.favorited, favoritesCount: incDecFavCount(!article.favorited) } :
+     article;
+  };
+  Array.map(updateCurrentArticle, articles);
 };
 
 let renderTag = ({ReasonReact.state: _state, reduce}, index, tag) => {
@@ -154,7 +155,7 @@ let renderArticle = ({ReasonReact.state: _state, reduce}, handle, router, articl
           <a href="" className="author"> (show(article.author.username)) </a>
           <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
         </div>
-        <button className="btn btn-outline-primary btn-sm pull-xs-right" onClick=(reduce((_) => FavoriteArticle(article.slug)))>
+        <button className="btn btn-outline-primary btn-sm pull-xs-right" onClick=(reduce((_) => FavoriteArticle(article.slug, article.favorited)))>
           <i className="ion-heart" />
           (show(string_of_int(article.favoritesCount)))
         </button>
@@ -227,12 +228,14 @@ let make = (~articleCallback, ~router, _children) => {
       let reduceFunc = (articleList) => self.reduce((_) => TagArticlesFetched(articleList), ());
       JsonRequests.getArticlesByTag(reduceFeed(reduceFunc), currentTagName, Effects.getTokenFromStorage()) |> ignore;
     })
-    | FavoriteArticle(slug) => ReasonReact.UpdateWithSideEffects({
+    | FavoriteArticle(slug, isCurrentlyFav) => ReasonReact.UpdateWithSideEffects({
       ...state,
       articles: updateFavoritedCount(state.articles, slug)
     }, (_self) => {
-      Js.log(slug);
-      /* JsonRequests.favoriteArticle(Effects.getTokenFromStorage(), slug) |> ignore */
+      switch (!isCurrentlyFav) {
+      | true => JsonRequests.favoriteArticle(Effects.getTokenFromStorage(), slug) |> ignore 
+      | false => JsonRequests.unfavoriteArticle(Effects.getTokenFromStorage(), slug) |> ignore 
+      };
     })
     },
   didMount: (self) => {
