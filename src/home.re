@@ -2,9 +2,6 @@ open Models;
 
 let show = ReasonReact.stringToElement;
 
-let profile_image = {|http://i.imgur.com/Qr71crq.jpg|};
-let second_image = {|"http://i.imgur.com/N4VcUeJ.jpg"|};
-
 type action =
   | TagsFetched(array(string))
   | ShowMyFeed
@@ -13,7 +10,8 @@ type action =
   | MyArticlesFetched(articleList)
   | TagArticlesFetched(articleList)
   | ShowTagList(string)
-  | FavoriteArticle(string, bool);
+  | FavoriteArticle(string, bool)
+  | ArticlesByPage(int);
 
 type state = {
   myFeedDisplay: ReactDOMRe.style,
@@ -134,7 +132,7 @@ let updateFavoritedCount = (articles, currentSlug) => {
     let incDecFavCount = fun
     | true => article.favoritesCount + 1
     | false => article.favoritesCount -1;
-  
+
     article.slug == currentSlug ?
      {...article, favorited: !article.favorited, favoritesCount: incDecFavCount(!article.favorited) } :
      article;
@@ -144,6 +142,34 @@ let updateFavoritedCount = (articles, currentSlug) => {
 
 let renderTag = ({ReasonReact.state: _state, reduce}, index, tag) => {
   <a onClick=(reduce(showTaggedArticles)) href="#" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
+};
+
+let rec range = (a, b) =>
+  if (a > b) {
+    []
+  } else {
+    [a, ...range(a + 1, b)]
+  };
+
+let renderPager = ({ReasonReact.state: _state, reduce, ReasonReact.handle: handle}, articleCount) => {
+  let pageRanges = articleCount/10 |> range(1);
+  let reduceArticles = (currentPageNumber, event, _self) => {
+    ReactEventRe.Mouse.preventDefault(event);
+    reduce((_) => ArticlesByPage(currentPageNumber), ())
+  };
+
+  /* Add the logic to highlight the current page */
+  List.map((currentPageNumber) => {
+    <li className="page-item ng-scope" key=(string_of_int(currentPageNumber))>
+      <a className="page-link ng-binding" href="" onClick=(handle(reduceArticles(currentPageNumber)))>(show(string_of_int(currentPageNumber)))</a>
+    </li>
+  }, pageRanges) |> Array.of_list  |> ReasonReact.arrayToElement
+
+  /*
+  <li className="page-item ng-scope active">
+    <a className="page-link ng-binding" href="">(show(string_of_int(2)))</a>
+  </li>
+   */
 };
 
 let renderArticle = ({ReasonReact.state: _state, reduce}, handle, router, articleCallback, index, article) => {
@@ -233,10 +259,14 @@ let make = (~articleCallback, ~router, _children) => {
       articles: updateFavoritedCount(state.articles, slug)
     }, (_self) => {
       switch (!isCurrentlyFav) {
-      | true => JsonRequests.favoriteArticle(Effects.getTokenFromStorage(), slug) |> ignore 
-      | false => JsonRequests.unfavoriteArticle(Effects.getTokenFromStorage(), slug) |> ignore 
+      | true => JsonRequests.favoriteArticle(Effects.getTokenFromStorage(), slug) |> ignore
+      | false => JsonRequests.unfavoriteArticle(Effects.getTokenFromStorage(), slug) |> ignore
       };
     })
+    | ArticlesByPage(currentPage) => ReasonReact.SideEffects((_self) => {
+      Js.log({j|Current page: $currentPage|j})
+    })
+    
     },
   didMount: (self) => {
     populateTags(self.reduce);
@@ -277,6 +307,13 @@ let make = (~articleCallback, ~router, _children) => {
             </div>
             <div style=(state.tagFeedDisplay)>
               {Array.mapi(renderArticle(self, self.handle, router, articleCallback), state.articles) |> ReasonReact.arrayToElement}
+            </div>
+            <div>
+              <nav>
+                <ul className="pagination">
+                  {renderPager(self, state.articleCount)}
+                </ul>
+              </nav>
             </div>
           </div>
           <div className="col-md-3">
