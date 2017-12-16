@@ -98,11 +98,11 @@ let reduceFeed = (reduceToAction, _state, jsonPayload) => {
   })
 };
 
-let populateGlobalFeed = (reduce) => {
+let populateGlobalFeed = (reduce, pageNumber) => {
   let reduceFunc = (articleList) => reduce((_) => ArticlesFetched(articleList), ());
-  
+
   /* Get the right page if there are more than 10 articles */
-  JsonRequests.getGlobalArticles(reduceFeed(reduceFunc), Effects.getTokenFromStorage(), 10, 0) |> ignore;
+  JsonRequests.getGlobalArticles(reduceFeed(reduceFunc), Effects.getTokenFromStorage(), 10, pageNumber * 10) |> ignore;
 };
 
 let populateFeed = (reduce) => {
@@ -118,7 +118,7 @@ let showMyFeed = (event, {ReasonReact.state: _state, reduce}) => {
 
 let showGlobalFeed = (event, {ReasonReact.state: _state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
-  populateGlobalFeed(reduce);
+  populateGlobalFeed(reduce, 0);
   reduce((_) => ShowGlobalFeed,());
 };
 
@@ -150,7 +150,7 @@ let renderTag = ({ReasonReact.state: _state, reduce}, index, tag) => {
   <a onClick=(reduce(showTaggedArticles)) href="#" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
 };
 
-let renderArticleTag = (index, tag) => { 
+let renderArticleTag = (index, tag) => {
   <li className="tag-default tag-pill tag-outline" key=(string_of_int(index))>
     (show(tag))
   </li>
@@ -183,7 +183,7 @@ let displayImage =
   | Some(image) => image
   | None => "";
 
-let renderArticle = ({ReasonReact.state: _state, reduce}, handle, router, articleCallback, index, article) => {  
+let renderArticle = ({ReasonReact.state: _state, reduce}, handle, router, articleCallback, index, article) => {
   <div key=(string_of_int(index)) className="article-preview">
     <div>
       <div className="article-meta">
@@ -264,7 +264,7 @@ let make = (~articleCallback, ~router, _children) => {
       myFeedActiveClass: "nav-link disabled",
       globalfeedActiveClass: "nav-link disabled",
       tagFeedActiveClass: "nav-link active"
-    }, (self) => {      
+    }, (self) => {
       let reduceFunc = (articleList) => self.reduce((_) => TagArticlesFetched(articleList), ());
       JsonRequests.getArticlesByTag(reduceFeed(reduceFunc), currentTagName, Effects.getTokenFromStorage()) |> ignore;
     })
@@ -277,14 +277,15 @@ let make = (~articleCallback, ~router, _children) => {
       | false => JsonRequests.unfavoriteArticle(Effects.getTokenFromStorage(), slug) |> ignore
       };
     })
-    | ArticlesByPage(currentPage) => ReasonReact.SideEffects((_self) => {
-      Js.log({j|Current page: $currentPage|j})
+    | ArticlesByPage(currentPage) => ReasonReact.SideEffects((self) => {
+      let reduceFunc = (articleList) => self.reduce((_) => ArticlesFetched(articleList), ());
+      JsonRequests.getGlobalArticles(reduceFeed(reduceFunc), Effects.getTokenFromStorage(), 10, currentPage * 10) |> ignore;
     })
 
     },
   didMount: (self) => {
     populateTags(self.reduce);
-    populateGlobalFeed(self.reduce);
+    populateGlobalFeed(self.reduce, 0);
     ReasonReact.NoUpdate
   },
   render: (self) => {
