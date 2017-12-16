@@ -127,6 +127,11 @@ let goToArticle = (router, articleCallback, article, event, {ReasonReact.state: 
   DirectorRe.setRoute(router,"/article")
 };
 
+let goToProfile = (router, event, {ReasonReact.state: _state}) => {
+  ReactEventRe.Mouse.preventDefault(event);  
+  DirectorRe.setRoute(router,"/profile")
+};
+
 let updateFavoritedCount = (articles, currentSlug) => {
   let updateCurrentArticle = (article) => {
     let incDecFavCount = fun
@@ -164,19 +169,18 @@ let renderPager = ({ReasonReact.state: _state, reduce, ReasonReact.handle: handl
       <a className="page-link ng-binding" href="" onClick=(handle(reduceArticles(currentPageNumber)))>(show(string_of_int(currentPageNumber)))</a>
     </li>
   }, pageRanges) |> Array.of_list  |> ReasonReact.arrayToElement
-
-  /*
-  <li className="page-item ng-scope active">
-    <a className="page-link ng-binding" href="">(show(string_of_int(2)))</a>
-  </li>
-   */
 };
+
+let displayImage =
+  fun
+  | Some(image) => image
+  | None => "";
 
 let renderArticle = ({ReasonReact.state: _state, reduce}, handle, router, articleCallback, index, article) => {
   <div key=(string_of_int(index)) className="article-preview">
     <div>
       <div className="article-meta">
-        <a href="profile.html" />
+        <a href="#" onClick=(handle(goToProfile(router)))> <img src=(displayImage(article.author.image))/> </a>
         <div className="info">
           <a href="" className="author"> (show(article.author.username)) </a>
           <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>

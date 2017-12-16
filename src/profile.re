@@ -125,11 +125,16 @@ let goToArticle = (router, articleCallback, article, event, {ReasonReact.state})
   DirectorRe.setRoute(router,"/article")
 };
 
+let displayImage =
+  fun
+  | Some(image) => image
+  | None => "";
+
 let renderArticle = (handle, router, articleCallback, index, article) =>
   <div key=(string_of_int(index)) className="article-preview">
     <div>
       <div className="article-meta">
-        <a href="profile.html" />
+        <a href="#"/>  
         <div className="info">
           <a href="" className="author"> (show(article.author.username)) </a>
           <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
