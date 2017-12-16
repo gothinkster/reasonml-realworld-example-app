@@ -189,7 +189,7 @@ let renderArticle = ({ReasonReact.state: _state, reduce}, handle, router, articl
       <div className="article-meta">
         <a href="#" onClick=(handle(goToProfile(router)))> <img src=(displayImage(article.author.image))/> </a>
         <div className="info">
-          <a href="" className="author"> (show(article.author.username)) </a>
+          <a href="#" onClick=(handle(goToProfile(router))) className="author"> (show(article.author.username)) </a>
           <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
         </div>
         <button className="btn btn-outline-primary btn-sm pull-xs-right" onClick=(reduce((_) => FavoriteArticle(article.slug, article.favorited)))>

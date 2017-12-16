@@ -25,7 +25,7 @@ type state = {
   currentArticle: article
 };
 
-type action = 
+type action =
   | SetCurrentArticle(article);
 
 let articleCallback = (reduce, currentArticle) => {
@@ -37,11 +37,11 @@ let component = ReasonReact.reducerComponent("Body");
 let make = (~route, ~router, _children) => {
   ...component,
   initialState: () => { currentArticle: defaultArticle },
-  reducer: (action, _state) => 
+  reducer: (action, _state) =>
     switch action {
     | SetCurrentArticle(article) => ReasonReact.Update({currentArticle: article})
     },
-  render: (self) => {    
+  render: (self) => {
     let {ReasonReact.state, reduce} = self;
     let article = state.currentArticle;
     let select_subpage = (route) =>

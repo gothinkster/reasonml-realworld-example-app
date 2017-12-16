@@ -195,7 +195,7 @@ let make = (~articleCallback, ~router, _children) => {
     },
   didMount: (self) => {
     let (username, bio, image) = Effects.getUserFromStorage();
-
+    
     let currentUsername = getDefaultFieldFor(username);
     let currentBio = getDefaultFieldFor(bio);
     let currentImage = getDefaultFieldFor(image);
