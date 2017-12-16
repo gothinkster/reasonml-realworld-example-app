@@ -97,6 +97,11 @@ let clickMyArticles = (event, {ReasonReact.state, reduce}) => {
   reduce((_) => PendingMyArticles, ())
 };
 
+let clickProfileSettings = (router, event, {ReasonReact.state: _state}) => {
+  ReactEventRe.Mouse.preventDefault(event);
+  DirectorRe.setRoute(router,"/settings")
+};
+
 let clickMyFavorites = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
   let reduceFunc = (articles) => reduce((_) => FavoriteArticle(articles),());
@@ -149,7 +154,7 @@ let renderArticle = (handle, router, articleCallback, isFavorites, index, articl
         </div>
         <button className="btn btn-outline-primary btn-sm pull-xs-right">
           <i className="ion-heart" />
-          (show("0"))
+          (show(string_of_int(article.favoritesCount)))
         </button>
       </div>
       <a href="#" onClick=(handle(goToArticle(router, articleCallback, article))) className="preview-link">
@@ -215,7 +220,7 @@ let make = (~articleCallback, ~router, _children) => {
                   show(state.bio)
                 )
               </p>
-              <button className="btn btn-sm btn-outline-secondary action-btn">
+              <button className="btn btn-sm btn-outline-secondary action-btn" onClick=(self.handle(clickProfileSettings(router)))>
                 <i className="ion-plus-round" />
                 (show("Edit Profile Settings"))
               </button>
