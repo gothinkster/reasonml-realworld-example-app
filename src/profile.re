@@ -77,7 +77,7 @@ let reduceMyArtcles = (reduceFunc, _status, payload) => {
       articlesCount: parsedArticles |> field("articlesCount", int)
     };
     reduceFunc(articleList.articles);
-    
+
     articleList |> Js.Promise.resolve;
   });
 
@@ -86,8 +86,8 @@ let reduceMyArtcles = (reduceFunc, _status, payload) => {
 let clickMyArticles = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
   let reduceFunc = (articles) => reduce((_) => MyArticles(articles),());
-  
-  JsonRequests.getMyArticles(reduceMyArtcles(reduceFunc), state.username, Effects.getTokenFromStorage()) 
+
+  JsonRequests.getMyArticles(reduceMyArtcles(reduceFunc), state.username, Effects.getTokenFromStorage())
   |> ignore;
 
   reduce((_) => PendingMyArticles, ())
@@ -97,7 +97,7 @@ let clickMyFavorites = (event, {ReasonReact.state, reduce}) => {
   ReactEventRe.Mouse.preventDefault(event);
   let reduceFunc = (articles) => reduce((_) => FavoriteArticle(articles),());
   JsonRequests.getFavoritedArticles(reduceMyArtcles(reduceFunc), state.username, Effects.getTokenFromStorage())
-  |> ignore;  
+  |> ignore;
 
   reduce((_) => PendingFavoriteArticles, ())
 };
@@ -130,11 +130,15 @@ let displayImage =
   | Some(image) => image
   | None => "";
 
-let renderArticle = (handle, router, articleCallback, index, article) =>
+let renderArticle = (handle, router, articleCallback, isFavorites, index, article) =>
   <div key=(string_of_int(index)) className="article-preview">
     <div>
       <div className="article-meta">
-        <a href="#"/>  
+        (if (isFavorites){
+          <a href="profile.html"> <img src=(displayImage(article.author.image))/> </a>
+        }else{
+          <a href="#"/>
+        })        
         <div className="info">
           <a href="" className="author"> (show(article.author.username)) </a>
           <span className="date"> (show(Js.Date.fromString(article.createdAt) |> Js.Date.toDateString)) </span>
@@ -225,10 +229,10 @@ let make = (~articleCallback, ~router, _children) => {
               </ul>
             </div>
             <div style=(state.isMyArticleDisplay)>
-              {Array.mapi(renderArticle(self.handle, router, articleCallback), state.myArticles) |>  ReasonReact.arrayToElement}
+              {Array.mapi(renderArticle(self.handle, router, articleCallback, false), state.myArticles) |>  ReasonReact.arrayToElement}
             </div>
-            <div className="article-preview" style=(state.isFavArticleDisplay)>
-              {Array.mapi(renderArticle(self.handle, router, articleCallback), state.favoriteArticles) |>  ReasonReact.arrayToElement}
+            <div style=(state.isFavArticleDisplay)>
+              {Array.mapi(renderArticle(self.handle, router, articleCallback, true), state.favoriteArticles) |>  ReasonReact.arrayToElement}
             </div>
           </div>
         </div>
