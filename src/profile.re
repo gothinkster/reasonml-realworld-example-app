@@ -12,7 +12,9 @@ type state = {
   image: string,
   isMyArticleDisplay: ReactDOMRe.style,
   isFavArticleDisplay: ReactDOMRe.style,
-  articles: array(article)
+  articles: array(article),
+  myFeedActiveClass: string,
+  favfeedActiveClass: string
 };
 
 let initialState = {
@@ -24,6 +26,8 @@ let initialState = {
   bio: "",
   isMyArticleDisplay: ReactDOMRe.Style.make(~display="block", ()),
   isFavArticleDisplay: ReactDOMRe.Style.make(~display="none", ()),
+  myFeedActiveClass: "nav-link disabled",
+  favfeedActiveClass: "nav-link active",
   articles: [||],
   image: ""
 };
@@ -168,13 +172,17 @@ let make = (~articleCallback, ~router, _children) => {
       ...state,
       isMyArticleDisplay: ReactDOMRe.Style.make(~display ="block",()),
       isFavArticleDisplay: ReactDOMRe.Style.make(~display="none", ()),
-      myArticles: articleList
+      myArticles: articleList,
+      myFeedActiveClass: "nav-link active",
+      favfeedActiveClass: "nav-link disabled"
     })
     | FavoriteArticle(articleList) => ReasonReact.Update({
       ...state,
       isMyArticleDisplay: ReactDOMRe.Style.make(~display="none", ()),
       isFavArticleDisplay: ReactDOMRe.Style.make(~display="block", ()),
-      favoriteArticles: articleList
+      favoriteArticles: articleList,
+      myFeedActiveClass: "nav-link disabled",
+      favfeedActiveClass: "nav-link active"
     })
     | CurrentUserFetched ((username, bio, image)) => ReasonReact.Update({ ...state, username: username, bio: bio, image: image })
     | NoData => ReasonReact.NoUpdate
@@ -221,10 +229,10 @@ let make = (~articleCallback, ~router, _children) => {
             <div className="articles-toggle">
               <ul className="nav nav-pills outline-active">
                 <li className="nav-item">
-                  <a className="nav-link active" href="#" onClick=(self.handle(clickMyArticles))> (show("My Articles")) </a>
+                  <a className=(state.myFeedActiveClass) href="#" onClick=(self.handle(clickMyArticles))> (show("My Articles")) </a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="#" onClick=(self.handle(clickMyFavorites))> (show("Favorited Articles")) </a>
+                  <a className=(state.favfeedActiveClass) href="#" onClick=(self.handle(clickMyFavorites))> (show("Favorited Articles")) </a>
                 </li>
               </ul>
             </div>
