@@ -176,7 +176,7 @@ let getArticlesByTag = (articleFunc, tagName, token) => {
 };
 
 let getGlobalArticles = (getArticlesFunc, token, limit, offset) => {
-  let urlAfterBase = apiUrlBase ++ mapUrl(Config.Articles) ++ "?limit=" ++ string_of_int(limit) ++ "&offset=" ++ string_of_int(offset);
+  let urlAfterBase = apiUrlBase ++ mapUrl(Config.Articles) ++ "?limit=" ++ string_of_int(limit) ++ "&offset=" ++ string_of_int(offset);  
   sendRequest(Get, token, None, getArticlesFunc, urlAfterBase);
 };
 

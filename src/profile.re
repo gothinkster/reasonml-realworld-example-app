@@ -111,7 +111,6 @@ let clickMyFavorites = (event, {ReasonReact.state, reduce}) => {
   reduce((_) => PendingFavoriteArticles, ())
 };
 
-
 /* side effect */
 let reduceByAuthArticles = ({ReasonReact.state, reduce}, _status, jsonPayload) =>  {
   jsonPayload |> Js.Promise.then_((payload) => {

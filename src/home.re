@@ -61,7 +61,7 @@ let decodeArticles = (json) => {
     title: json |> field("title", string),
     description: json |> field("description", string),
     body: json |> field("body", string),
-    tagList: [||], /* json |> field("tagList", array(string)) */
+    tagList: json |> field("tagList", array(string)),
     createdAt: json |> field("createdAt", string),
     updatedAt: json |> field("updatedAt", string),
     favorited: json |> field("favorited", bool),
@@ -100,6 +100,7 @@ let reduceFeed = (reduceToAction, _state, jsonPayload) => {
 
 let populateGlobalFeed = (reduce) => {
   let reduceFunc = (articleList) => reduce((_) => ArticlesFetched(articleList), ());
+  
   /* Get the right page if there are more than 10 articles */
   JsonRequests.getGlobalArticles(reduceFeed(reduceFunc), Effects.getTokenFromStorage(), 10, 0) |> ignore;
 };
@@ -128,7 +129,7 @@ let goToArticle = (router, articleCallback, article, event, {ReasonReact.state: 
 };
 
 let goToProfile = (router, event, {ReasonReact.state: _state}) => {
-  ReactEventRe.Mouse.preventDefault(event);  
+  ReactEventRe.Mouse.preventDefault(event);
   DirectorRe.setRoute(router,"/profile")
 };
 
@@ -147,6 +148,12 @@ let updateFavoritedCount = (articles, currentSlug) => {
 
 let renderTag = ({ReasonReact.state: _state, reduce}, index, tag) => {
   <a onClick=(reduce(showTaggedArticles)) href="#" key=(string_of_int(index)) className="tag-pill tag-default"> (show(tag)) </a>
+};
+
+let renderArticleTag = (index, tag) => { 
+  <li className="tag-default tag-pill tag-outline" key=(string_of_int(index))>
+    (show(tag))
+  </li>
 };
 
 let rec range = (a, b) =>
@@ -176,7 +183,7 @@ let displayImage =
   | Some(image) => image
   | None => "";
 
-let renderArticle = ({ReasonReact.state: _state, reduce}, handle, router, articleCallback, index, article) => {
+let renderArticle = ({ReasonReact.state: _state, reduce}, handle, router, articleCallback, index, article) => {  
   <div key=(string_of_int(index)) className="article-preview">
     <div>
       <div className="article-meta">
@@ -196,6 +203,9 @@ let renderArticle = ({ReasonReact.state: _state, reduce}, handle, router, articl
         </h1>
         <p> (show(article.description)) </p>
         <span> (show("Read more...")) </span>
+        <ul className="tag-list">
+          {Array.mapi(renderArticleTag, article.tagList) |> ReasonReact.arrayToElement}
+        </ul>
       </a>
     </div>
   </div>
@@ -254,7 +264,7 @@ let make = (~articleCallback, ~router, _children) => {
       myFeedActiveClass: "nav-link disabled",
       globalfeedActiveClass: "nav-link disabled",
       tagFeedActiveClass: "nav-link active"
-    }, (self) => {
+    }, (self) => {      
       let reduceFunc = (articleList) => self.reduce((_) => TagArticlesFetched(articleList), ());
       JsonRequests.getArticlesByTag(reduceFeed(reduceFunc), currentTagName, Effects.getTokenFromStorage()) |> ignore;
     })
@@ -270,7 +280,7 @@ let make = (~articleCallback, ~router, _children) => {
     | ArticlesByPage(currentPage) => ReasonReact.SideEffects((_self) => {
       Js.log({j|Current page: $currentPage|j})
     })
-    
+
     },
   didMount: (self) => {
     populateTags(self.reduce);
