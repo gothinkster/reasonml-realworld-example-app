@@ -18,22 +18,23 @@ type urlMap =
   | Tags
   | Feed;
 
-let mapUrl = (url) =>
-  switch url {
+let mapUrl = url =>
+  switch (url) {
   | Authenticate => "/users/login"
   | Register => "/users"
   | CurrentUser
   | UpdateUser => "/user"
   | Profile(username) => "/profiles/" ++ username
   | Follow(username)
-  | Unfollow(username) => "/profiles/" ++ (username ++ "/follow")
+  | Unfollow(username) => "/profiles/" ++ username ++ "/follow"
   | Articles => "/articles"
   | ArticleBySlug(slug) => "/articles/" ++ slug
-  | ArticleCommentBySlug(slug) => "/articles/" ++ (slug ++ "/comments")
-  | DeleteComment(slug, commentId) => "/articles/" ++ slug ++ "/comments/" ++ string_of_int(commentId)
-  | ArticleBySlugId((slug, id)) => "/articles/" ++ (slug ++ ("/comments/" ++ id))
+  | ArticleCommentBySlug(slug) => "/articles/" ++ slug ++ "/comments"
+  | DeleteComment(slug, commentId) =>
+    "/articles/" ++ slug ++ "/comments/" ++ string_of_int(commentId)
+  | ArticleBySlugId((slug, id)) => "/articles/" ++ slug ++ "/comments/" ++ id
   | Feed => "/articles/feed"
   | ArticleFavorite(slug)
-  | ArticleUnfavorite(slug) => "/articles/" ++ (slug ++ "/favorite")
+  | ArticleUnfavorite(slug) => "/articles/" ++ slug ++ "/favorite"
   | Tags => "/tags"
   };
