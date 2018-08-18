@@ -11,7 +11,7 @@ let router =
     "/article/create": "article_create",
     "/article/edit": "article_edit",
     "/article": "article",
-    "/profile": "profile"
+    "/profile": "profile",
   });
 
 let handlers = {
@@ -23,7 +23,7 @@ let handlers = {
   "article_create": () => renderForRoute(Routes.CreateArticle, router),
   "article_edit": () => renderForRoute(Routes.EditArticle, router),
   "article": () => renderForRoute(Routes.Article, router),
-  "profile": () => renderForRoute(Routes.Profile, router)
+  "profile": () => renderForRoute(Routes.Profile, router),
 };
 
 DirectorRe.configure(router, {"html5history": true, "resource": handlers});

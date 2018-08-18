@@ -1,10 +1,11 @@
-let show = ReasonReact.stringToElement;
+open Infix;
+let show = ReasonReact.string;
 
 type state = {
   title: string,
   description: string,
   articleBody: string,
-  rawTags: string
+  rawTags: string,
 };
 
 type action =
@@ -14,56 +15,70 @@ type action =
   | UpdateBody(string)
   | UpdateTags(string);
 
-let parseTags = (enteredTags) => Js.String.split(",", enteredTags);
+let parseTags = enteredTags => Js.String.split(",", enteredTags);
 
 module Encode = {
-  let newArticle = (articleDetails: state) => {
-    Json.Encode.(object_([
-      ("title", string(articleDetails.title)),
-      ("description", string(articleDetails.description)),
-      ("body", string(articleDetails.articleBody)),
-      ("tagList", parseTags(articleDetails.rawTags) |> Json.Encode.stringArray)
-    ]));
-  };
+  let newArticle = (articleDetails: state) =>
+    Json.Encode.(
+      object_([
+        ("title", string(articleDetails.title)),
+        ("description", string(articleDetails.description)),
+        ("body", string(articleDetails.articleBody)),
+        (
+          "tagList",
+          parseTags(articleDetails.rawTags) |> Json.Encode.stringArray,
+        ),
+      ])
+    );
 };
 
-let submissionResponse = (_status, payload) => {
-  payload |> Js.Promise.then_((result) => Js.log(result) |> Js.Promise.resolve)
-};  
+let submissionResponse = (_status, payload) =>
+  payload |> Js.Promise.then_(result => Js.log(result) |> Js.Promise.resolve);
 
-let submitNewArticle = (router, event, {ReasonReact.state, reduce}) => {
-  ReactEventRe.Mouse.preventDefault(event);
-  JsonRequests.submitNewArticle(submissionResponse, Encode.newArticle(state) , Effects.getTokenFromStorage()) |> ignore;
-  let reduceArticleSubmission = (_) => ArticleSubmitted(router);
-  reduce(reduceArticleSubmission, ())
+let submitNewArticle = (router, event, state, send) => {
+  ReactEvent.Mouse.preventDefault(event);
+  JsonRequests.submitNewArticle(
+    submissionResponse,
+    Encode.newArticle(state),
+    Effects.getTokenFromStorage(),
+  )
+  |> ignore;
+  send(ArticleSubmitted(router));
 };
 
-let updateTitle = (event) =>
-  UpdateTitle(ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value);
-let updateDescription = (event) =>
-  UpdateDescription(ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value);
-let updateBody = (event) =>
-  UpdateBody(ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value);
-let updateTags = (event) =>
-  UpdateTags(ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value);
+let updateTitle = event => UpdateTitle(ReactEvent.Form.target(event)##value);
+
+let updateDescription = event =>
+  UpdateDescription(ReactEvent.Form.target(event)##value);
+
+let updateBody = event => UpdateBody(ReactEvent.Form.target(event)##value);
+
+let updateTags = event => UpdateTags(ReactEvent.Form.target(event)##value);
 
 /* TODO: Add validation for body and title to be required */
-
 let component = ReasonReact.reducerComponent("CreateArticle");
-let make = (~router,_children) => {
+
+let make = (~router, _children) => {
   ...component,
-  initialState: () => {title:"",description: "", articleBody: "", rawTags: ""},
+  initialState: () => {
+    title: "",
+    description: "",
+    articleBody: "",
+    rawTags: "",
+  },
   reducer: (action, state) =>
-    switch action {
-    | ArticleSubmitted(router) => ReasonReact.SideEffects((_self) => {
-      DirectorRe.setRoute(router, "/home")
-    })
-    | UpdateTitle(title) => ReasonReact.Update({...state, title: title})
-    | UpdateDescription(description) => ReasonReact.Update({...state, description: description})
+    switch (action) {
+    | ArticleSubmitted(router) =>
+      ReasonReact.SideEffects(
+        (_self => DirectorRe.setRoute(router, "/home")),
+      )
+    | UpdateTitle(title) => ReasonReact.Update({...state, title})
+    | UpdateDescription(description) =>
+      ReasonReact.Update({...state, description})
     | UpdateBody(body) => ReasonReact.Update({...state, articleBody: body})
     | UpdateTags(tags) => ReasonReact.Update({...state, rawTags: tags})
-  },
-  render: (self) =>
+    },
+  render: self =>
     <div className="editor-page">
       <div className="container page">
         <div className="row">
@@ -72,20 +87,20 @@ let make = (~router,_children) => {
               <fieldset>
                 <fieldset className="form-group">
                   <input
-                    _type="text"
+                    type_="text"
                     className="form-control form-control-lg"
                     placeholder="Article Title"
-                    value=(self.state.title)
-                    onChange=(self.reduce(updateTitle))
+                    value={self.state.title}
+                    onChange={updateTitle >> self.send}
                   />
                 </fieldset>
                 <fieldset className="form-group">
                   <input
-                    _type="text"
+                    type_="text"
                     className="form-control"
                     placeholder="What's this article about?"
-                    value=(self.state.description)
-                    onChange=(self.reduce(updateDescription))
+                    value={self.state.description}
+                    onChange={updateDescription >> self.send}
                   />
                 </fieldset>
                 <fieldset className="form-group">
@@ -93,27 +108,33 @@ let make = (~router,_children) => {
                     className="form-control"
                     rows=8
                     placeholder="Write your article (in markdown)"
-                    value=(self.state.articleBody)
-                    onChange=(self.reduce(updateBody))
+                    value={self.state.articleBody}
+                    onChange={updateBody >> self.send}
                   />
                 </fieldset>
                 <fieldset className="form-group">
-                  <input 
-                    _type="text" 
-                    className="form-control" 
-                    placeholder="Enter tags" 
-                    value=(self.state.rawTags) 
-                    onChange=(self.reduce(updateTags))
+                  <input
+                    type_="text"
+                    className="form-control"
+                    placeholder="Enter tags"
+                    value={self.state.rawTags}
+                    onChange={updateTags >> self.send}
                   />
                   <div className="tag-list" />
                 </fieldset>
-                <button className="btn btn-lg pull-xs-right btn-primary" _type="button" onClick=(self.handle(submitNewArticle(router)))>
-                  (show("Publish Article"))
+                <button
+                  className="btn btn-lg pull-xs-right btn-primary"
+                  type_="button"
+                  onClick={
+                    event =>
+                      submitNewArticle(router, event, self.state, self.send)
+                  }>
+                  {show("Publish Article")}
                 </button>
               </fieldset>
             </form>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
 };
