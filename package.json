@@ -14,17 +14,18 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "bs-jest": "^0.1.0",
-    "bs-platform": "^2.0"
+    "@glennsl/bs-jest": "^0.4.3",
+    "bs-platform": "^4.0.5",
+    "webpack-cli": "^3.1.0"
   },
   "dependencies": {
-    "bs-axios": "^0.0.16",
-    "bs-director": "^0.0.4",
-    "bs-fetch": "^0.1.1",
-    "bs-json": "^0.2.1",
-    "express": "^4.15.4",
-    "reason-react": "^0.2.4",
-    "webpack": "^3.5.6",
-    "webpack-dev-server": "^2.7.1"
+    "@glennsl/bs-json": "^3.0.0",
+    "bs-axios": "^0.0.39",
+    "bs-director": "^0.0.6",
+    "bs-fetch": "^0.3.0",
+    "express": "^4.16.3",
+    "reason-react": "^0.5.3",
+    "webpack": "^4.16.5",
+    "webpack-dev-server": "^3.1.5"
   }
 }

@@ -6,36 +6,34 @@ type user = {
   username: string,
   bio: option(string),
   image: option(string),
-  token: string
+  token: string,
 };
 
 type errorDetails = {
   email: option(array(string)),
   password: option(array(string)),
-  username: option(array(string))
+  username: option(array(string)),
 };
 
 type registeredUser = {
   errors: option(errorDetails),
-  user
+  user,
 };
 
 type articleDetails = {
   title: string,
   description: string,
   body: string,
-  tags: array(string)
+  tags: array(string),
 };
 
-type newArticle = {
-  article: articleDetails
-};
+type newArticle = {article: articleDetails};
 
 type author = {
   username: string,
   bio: option(string),
   image: option(string),
-  following: bool
+  following: bool,
 };
 
 type article = {
@@ -48,10 +46,10 @@ type article = {
   updatedAt: string,
   favorited: bool,
   favoritesCount: int,
-  author: author
+  author,
 };
 
 type articleList = {
   articles: array(article),
-  articlesCount: int
+  articlesCount: int,
 };
