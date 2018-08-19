@@ -1,5 +1,4 @@
 open Infix;
-let show = ReasonReact.string;
 
 type state = {
   title: string,
@@ -9,7 +8,7 @@ type state = {
 };
 
 type action =
-  | ArticleSubmitted(DirectorRe.t)
+  | ArticleSubmitted
   | UpdateTitle(string)
   | UpdateDescription(string)
   | UpdateBody(string)
@@ -35,7 +34,7 @@ module Encode = {
 let submissionResponse = (_status, payload) =>
   payload |> Js.Promise.then_(result => Js.log(result) |> Js.Promise.resolve);
 
-let submitNewArticle = (router, event, state, send) => {
+let submitNewArticle = (event, state, send) => {
   ReactEvent.Mouse.preventDefault(event);
   JsonRequests.submitNewArticle(
     submissionResponse,
@@ -43,7 +42,7 @@ let submitNewArticle = (router, event, state, send) => {
     Effects.getTokenFromStorage(),
   )
   |> ignore;
-  send(ArticleSubmitted(router));
+  send(ArticleSubmitted);
 };
 
 let updateTitle = event => UpdateTitle(ReactEvent.Form.target(event)##value);
@@ -58,7 +57,7 @@ let updateTags = event => UpdateTags(ReactEvent.Form.target(event)##value);
 /* TODO: Add validation for body and title to be required */
 let component = ReasonReact.reducerComponent("CreateArticle");
 
-let make = (~router, _children) => {
+let make = _children => {
   ...component,
   initialState: () => {
     title: "",
@@ -68,10 +67,8 @@ let make = (~router, _children) => {
   },
   reducer: (action, state) =>
     switch (action) {
-    | ArticleSubmitted(router) =>
-      ReasonReact.SideEffects(
-        (_self => DirectorRe.setRoute(router, "/home")),
-      )
+    | ArticleSubmitted =>
+      ReasonReact.SideEffects((_self => ReasonReact.Router.push("/home")))
     | UpdateTitle(title) => ReasonReact.Update({...state, title})
     | UpdateDescription(description) =>
       ReasonReact.Update({...state, description})
@@ -126,8 +123,7 @@ let make = (~router, _children) => {
                   className="btn btn-lg pull-xs-right btn-primary"
                   type_="button"
                   onClick={
-                    event =>
-                      submitNewArticle(router, event, self.state, self.send)
+                    event => submitNewArticle(event, self.state, self.send)
                   }>
                   {show("Publish Article")}
                 </button>

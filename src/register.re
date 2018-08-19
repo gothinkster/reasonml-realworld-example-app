@@ -31,9 +31,7 @@ module Encode = {
 
 let component = ReasonReact.reducerComponent("Register");
 
-let show = ReasonReact.string;
-
-let register = (route, {ReasonReact.state, send}, event) => {
+let register = ({ReasonReact.state, send}, event) => {
   ReactEvent.Mouse.preventDefault(event);
   let jsonRequest = Encode.user(state);
   let updateState = (_status, jsonPayload) =>
@@ -43,7 +41,7 @@ let register = (route, {ReasonReact.state, send}, event) => {
          let updatedState =
            switch (newUser.errors) {
            | Some(_user) =>
-             DirectorRe.setRoute(route, "/home");
+             ReasonReact.Router.push("/home");
              {...state, hasValidationError: false};
            | None => {
                ...state,
@@ -63,9 +61,9 @@ let register = (route, {ReasonReact.state, send}, event) => {
   Register((false, ["Hitting server."]));
 };
 
-let goToLogin = (router, event) => {
+let goToLogin = event => {
   ReactEvent.Mouse.preventDefault(event);
-  DirectorRe.setRoute(router, "/login");
+  ReasonReact.Router.push("/login");
 };
 
 let login = _event => Login;
@@ -89,7 +87,7 @@ let errorDisplayList = state =>
      );
 
 /* TODO: use the route to go the next home screen when registered successfully */
-let make = (~router, _children) => {
+let make = _children => {
   ...component,
   initialState: () => {
     username: "",
@@ -116,9 +114,7 @@ let make = (~router, _children) => {
           <div className="col-md-6 offset-md-3 col-xs-12">
             <h1 className="text-xs-center"> {show("Sign up")} </h1>
             <p className="text-xs-center">
-              <a href="#" onClick={goToLogin(router)}>
-                {show("Have an account?")}
-              </a>
+              <a href="#" onClick=goToLogin> {show("Have an account?")} </a>
             </p>
             {
               if (state.hasValidationError) {
@@ -156,7 +152,7 @@ let make = (~router, _children) => {
                 />
               </fieldset>
               <button
-                onClick={register(router, self) >> send}
+                onClick={register(self) >> send}
                 className="btn btn-lg btn-primary pull-xs-right">
                 {show("Sign up")}
               </button>

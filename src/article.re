@@ -30,8 +30,6 @@ type action =
   | UnFollowUser(string)
   | FetchComments(list(comment));
 
-let show = ReasonReact.string;
-
 let component = ReasonReact.reducerComponent("Article");
 
 let renderComment = (send, index, comment) =>
@@ -102,7 +100,7 @@ let followUser = (isFollowing, event) =>
  */
 let dangerousHtml: string => Js.t('a) = html => {"__html": html};
 
-let make = (~router, ~article, _children) => {
+let make = (~article, _children) => {
   ...component,
   initialState: () => {
     slug: article.slug,

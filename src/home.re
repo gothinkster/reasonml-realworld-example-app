@@ -1,8 +1,6 @@
 open Models;
 open Infix;
 
-let show = ReasonReact.string;
-
 type action =
   | TagsFetched(array(string))
   | ShowMyFeed
@@ -129,15 +127,15 @@ let showGlobalFeed = (event, {ReasonReact.state: _state, send}) => {
 };
 
 let goToArticle =
-    (router, articleCallback, article, event, {ReasonReact.state: _state}) => {
+    (articleCallback, article, event, {ReasonReact.state: _state}) => {
   ReactEvent.Mouse.preventDefault(event);
   articleCallback(article);
-  DirectorRe.setRoute(router, "/article");
+  ReasonReact.Router.push("/article");
 };
 
-let goToProfile = (router, event, {ReasonReact.state: _state}) => {
+let goToProfile = (event, {ReasonReact.state: _state}) => {
   ReactEvent.Mouse.preventDefault(event);
-  DirectorRe.setRoute(router, "/profile");
+  ReasonReact.Router.push("/profile");
 };
 
 let updateFavoritedCount = (articles, currentSlug) => {
@@ -212,7 +210,6 @@ let renderArticle =
     (
       {ReasonReact.state: _state, send},
       handle,
-      router,
       articleCallback,
       index,
       article,
@@ -220,14 +217,11 @@ let renderArticle =
   <div key={string_of_int(index)} className="article-preview">
     <div>
       <div className="article-meta">
-        <a href="#" onClick={handle(goToProfile(router))}>
+        <a href="#" onClick={handle(goToProfile)}>
           <img src={displayImage(article.author.image)} />
         </a>
         <div className="info">
-          <a
-            href="#"
-            onClick={handle(goToProfile(router))}
-            className="author">
+          <a href="#" onClick={handle(goToProfile)} className="author">
             {show(article.author.username)}
           </a>
           <span className="date">
@@ -249,7 +243,7 @@ let renderArticle =
       </div>
       <a
         href="#"
-        onClick={handle(goToArticle(router, articleCallback, article))}
+        onClick={handle(goToArticle(articleCallback, article))}
         className="preview-link">
         <h1> {show(article.title)} </h1>
         <p> {show(article.description)} </p>
@@ -263,7 +257,7 @@ let renderArticle =
 
 let component = ReasonReact.reducerComponent("Home");
 
-let make = (~articleCallback, ~router, _children) => {
+let make = (~articleCallback, _children) => {
   ...component,
   initialState,
   reducer: (action, state) =>
@@ -415,7 +409,7 @@ let make = (~articleCallback, ~router, _children) => {
             <div style={state.myFeedDisplay}>
               {
                 Array.mapi(
-                  renderArticle(self, self.handle, router, articleCallback),
+                  renderArticle(self, self.handle, articleCallback),
                   state.articles,
                 )
                 |> ReasonReact.array
@@ -424,7 +418,7 @@ let make = (~articleCallback, ~router, _children) => {
             <div style={state.globalFeedDisplay}>
               {
                 Array.mapi(
-                  renderArticle(self, self.handle, router, articleCallback),
+                  renderArticle(self, self.handle, articleCallback),
                   state.articles,
                 )
                 |> ReasonReact.array
@@ -433,7 +427,7 @@ let make = (~articleCallback, ~router, _children) => {
             <div style={state.tagFeedDisplay}>
               {
                 Array.mapi(
-                  renderArticle(self, self.handle, router, articleCallback),
+                  renderArticle(self, self.handle, articleCallback),
                   state.articles,
                 )
                 |> ReasonReact.array

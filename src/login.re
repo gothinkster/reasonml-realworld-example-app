@@ -1,7 +1,5 @@
 open Infix;
 
-let show = ReasonReact.string;
-
 type state = {
   email: string,
   password: string,
@@ -15,9 +13,9 @@ type action =
   | PasswordUpdate(string)
   | LoginPending;
 
-let goToRegister = (router, event) => {
+let goToRegister = event => {
   ReactEvent.Mouse.preventDefault(event);
-  DirectorRe.setRoute(router, "/register");
+  ReasonReact.Router.push("/register");
 };
 
 module Encode = {
@@ -50,7 +48,7 @@ let errorDisplayList = state =>
        </ul>
      );
 
-let loginUser = (route, event, {ReasonReact.state, send}) => {
+let loginUser = (event, {ReasonReact.state, send}) => {
   ReactEvent.Mouse.preventDefault(event);
   let reduceByAuthResult = (_status, jsonPayload) =>
     jsonPayload
@@ -71,7 +69,7 @@ let loginUser = (route, event, {ReasonReact.state, send}) => {
                ~bio=loggedIn.user.bio,
                ~image=loggedIn.user.image,
              );
-             DirectorRe.setRoute(route, "/home");
+             ReasonReact.Router.push("/home");
              {...state, hasValidationError: false};
            };
          /* TODO: Create a reducer to do nothing with succesful login so the state doesn't try to update */
@@ -87,7 +85,7 @@ let loginUser = (route, event, {ReasonReact.state, send}) => {
 
 let component = ReasonReact.reducerComponent("Login");
 
-let make = (~router, _children) => {
+let make = _children => {
   ...component,
   initialState: () => {
     email: "",
@@ -112,7 +110,7 @@ let make = (~router, _children) => {
           <div className="col-md-6 offset-md-3 col-xs-12">
             <h1 className="text-xs-center"> {show("Sign in")} </h1>
             <p className="text-xs-center">
-              <a href="#" onClick={goToRegister(router)}>
+              <a href="#" onClick=goToRegister>
                 {show("Need an account?")}
               </a>
             </p>
@@ -143,7 +141,7 @@ let make = (~router, _children) => {
                 />
               </fieldset>
               <button
-                onClick={self.handle(loginUser(router))}
+                onClick={self.handle(loginUser)}
                 className="btn btn-lg btn-primary pull-xs-right">
                 {show("Sign in")}
               </button>

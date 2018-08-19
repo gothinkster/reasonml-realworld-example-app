@@ -1,25 +1,21 @@
-let component = ReasonReact.statelessComponent("Header");
+open Infix;
 
-let show = ReasonReact.string;
+let component = ReasonReact.statelessComponent("Header");
 
 let pointerStyle = () => ReactDOMRe.Style.make(~cursor="pointer", ());
 
-let navigateTo = (router, event, routeName) => {
+let navigateTo = (event, routeName) => {
   ReactEvent.Mouse.preventDefault(event);
-  DirectorRe.setRoute(router, routeName);
+  ReasonReact.Router.push(routeName);
 };
 
-let goToRegistration = (router, routeName, event) =>
-  navigateTo(router, event, routeName);
+let goToRegistration = (routeName, event) => navigateTo(event, routeName);
 
-let goToHome = (router, routeName, event) =>
-  navigateTo(router, event, routeName);
+let goToHome = (routeName, event) => navigateTo(event, routeName);
 
-let goToSettings = (router, routeName, event) =>
-  navigateTo(router, event, routeName);
+let goToSettings = (routeName, event) => navigateTo(event, routeName);
 
-let goToCreateArticle = (router, routeName, event) =>
-  navigateTo(router, event, routeName);
+let goToCreateArticle = (routeName, event) => navigateTo(event, routeName);
 
 let displayUsername = () => {
   let (optionalName, _, _) = Effects.getUserFromStorage();
@@ -30,14 +26,14 @@ let displayUsername = () => {
 };
 
 /* This really should be in a reducer component since we are doing a side effect here. */
-let displayByLogin = router =>
+let displayByLogin = () =>
   switch (Effects.getTokenFromStorage()) {
   | Some(_token) =>
     <a
       className="nav-link"
       style={pointerStyle()}
       href="#"
-      onClick={goToRegistration(router, "/profile")}>
+      onClick={goToRegistration("/profile")}>
       {show(displayUsername())}
     </a>
   | None =>
@@ -45,12 +41,12 @@ let displayByLogin = router =>
       className="nav-link"
       style={pointerStyle()}
       href="#"
-      onClick={goToRegistration(router, "/register")}>
+      onClick={goToRegistration("/register")}>
       {show("Sign up")}
     </a>
   };
 
-let make = (~router, _children) => {
+let make = _children => {
   ...component,
   render: _self =>
     <div>
@@ -65,7 +61,7 @@ let make = (~router, _children) => {
                 className="nav-link active"
                 style={pointerStyle()}
                 href="#"
-                onClick={goToHome(router, "/home")}>
+                onClick={goToHome("/home")}>
                 {show("Home")}
               </a>
             </li>
@@ -74,7 +70,7 @@ let make = (~router, _children) => {
                 className="nav-link"
                 style={pointerStyle()}
                 href="#"
-                onClick={goToCreateArticle(router, "/article/create")}>
+                onClick={goToCreateArticle("/article/create")}>
                 <i className="ion-compose" />
                 {show(" New Post")}
               </a>
@@ -84,12 +80,12 @@ let make = (~router, _children) => {
                 className="nav-link"
                 style={pointerStyle()}
                 href="#"
-                onClick={goToSettings(router, "/settings")}>
+                onClick={goToSettings("/settings")}>
                 <i className="ion-gear-a" />
                 {show(" Settings")}
               </a>
             </li>
-            <li className="nav-item"> {displayByLogin(router)} </li>
+            <li className="nav-item"> {displayByLogin()} </li>
           </ul>
         </div>
       </nav>

@@ -1,7 +1,5 @@
 open Models;
 
-let show = ReasonReact.string;
-
 let defaultAuthor = {username: "", bio: None, image: None, following: false};
 
 let defaultArticle = {
@@ -28,7 +26,7 @@ let articleCallback = (send, currentArticle) =>
 let component = ReasonReact.reducerComponent("Body");
 
 /* Just like any other variant data can be carried around with variants with the routes */
-let make = (~route, ~router, _children) => {
+let make = (~route, _children) => {
   ...component,
   initialState: () => {currentArticle: defaultArticle},
   reducer: (action, _state) =>
@@ -41,20 +39,15 @@ let make = (~route, ~router, _children) => {
     let article = state.currentArticle;
     let select_subpage = route =>
       switch (route) {
-      | Routes.Home => <Home articleCallback={articleCallback(send)} router />
-      | Routes.Register => <Register router />
-      | Routes.Login => <Login router />
-      | Routes.Settings => <Settings router />
-      | Routes.Article => <Article router article />
-      | Routes.CreateArticle => <CreateArticle router />
-      | Routes.EditArticle => <Article router article />
-      | Routes.Profile =>
-        <Profile articleCallback={articleCallback(send)} router />
+      | Routes.Home => <Home articleCallback={articleCallback(send)} />
+      | Routes.Register => <Register />
+      | Routes.Login => <Login />
+      | Routes.Settings => <Settings />
+      | Routes.Article => <Article article />
+      | Routes.CreateArticle => <CreateArticle />
+      | Routes.EditArticle => <Article article />
+      | Routes.Profile => <Profile articleCallback={articleCallback(send)} />
       };
-    <div>
-      <Header router />
-      <div> {route |> select_subpage} </div>
-      <Footer />
-    </div>;
+    <div> <Header /> <div> {route |> select_subpage} </div> <Footer /> </div>;
   },
 };

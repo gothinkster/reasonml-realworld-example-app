@@ -1,6 +1,5 @@
 open Models;
-
-let show = ReasonReact.string;
+open Infix;
 
 type state = {
   myArticles: array(article),
@@ -96,9 +95,9 @@ let clickMyArticles = (event, {ReasonReact.state, send}) => {
   send(PendingMyArticles);
 };
 
-let clickProfileSettings = (router, event, {ReasonReact.state: _state}) => {
+let clickProfileSettings = (event, {ReasonReact.state: _state}) => {
   ReactEvent.Mouse.preventDefault(event);
-  DirectorRe.setRoute(router, "/settings");
+  ReasonReact.Router.push("/settings");
 };
 
 let clickMyFavorites = (event, {ReasonReact.state, send}) => {
@@ -129,11 +128,10 @@ let reduceByAuthArticles = ({ReasonReact.state, send}, _status, jsonPayload) =>
      });
 
 /* These functions were copied from  */
-let goToArticle =
-    (router, articleCallback, article, event, {ReasonReact.state}) => {
+let goToArticle = (articleCallback, article, event, {ReasonReact.state}) => {
   ReactEvent.Mouse.preventDefault(event);
   articleCallback(article);
-  DirectorRe.setRoute(router, "/article");
+  ReasonReact.Router.push("/article");
 };
 
 let displayImage =
@@ -141,8 +139,7 @@ let displayImage =
   | Some(image) => image
   | None => "";
 
-let renderArticle =
-    (handle, router, articleCallback, isFavorites, index, article) =>
+let renderArticle = (handle, articleCallback, isFavorites, index, article) =>
   <div key={string_of_int(index)} className="article-preview">
     <div>
       <div className="article-meta">
@@ -172,7 +169,7 @@ let renderArticle =
       </div>
       <a
         href="#"
-        onClick={handle(goToArticle(router, articleCallback, article))}
+        onClick={handle(goToArticle(articleCallback, article))}
         className="preview-link">
         <h1> {show(article.title)} </h1>
         <p> {show(article.description)} </p>
@@ -183,7 +180,7 @@ let renderArticle =
 
 let component = ReasonReact.reducerComponent("Profile");
 
-let make = (~articleCallback, ~router, _children) => {
+let make = (~articleCallback, _children) => {
   ...component,
   initialState: () => initialState,
   reducer: (action, state) =>
@@ -240,7 +237,7 @@ let make = (~articleCallback, ~router, _children) => {
               <p> {show(state.bio)} </p>
               <button
                 className="btn btn-sm btn-outline-secondary action-btn"
-                onClick={self.handle(clickProfileSettings(router))}>
+                onClick={self.handle(clickProfileSettings)}>
                 <i className="ion-plus-round" />
                 {show("Edit Profile Settings")}
               </button>
@@ -274,7 +271,7 @@ let make = (~articleCallback, ~router, _children) => {
             <div style={state.isMyArticleDisplay}>
               {
                 Array.mapi(
-                  renderArticle(self.handle, router, articleCallback, false),
+                  renderArticle(self.handle, articleCallback, false),
                   state.myArticles,
                 )
                 |> ReasonReact.array
@@ -283,7 +280,7 @@ let make = (~articleCallback, ~router, _children) => {
             <div style={state.isFavArticleDisplay}>
               {
                 Array.mapi(
-                  renderArticle(self.handle, router, articleCallback, true),
+                  renderArticle(self.handle, articleCallback, true),
                   state.favoriteArticles,
                 )
                 |> ReasonReact.array

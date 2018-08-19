@@ -20,10 +20,7 @@
   },
   "dependencies": {
     "@glennsl/bs-json": "^3.0.0",
-    "bs-axios": "^0.0.39",
-    "bs-director": "^0.0.6",
     "bs-fetch": "^0.3.0",
-    "express": "^4.16.3",
     "reason-react": "^0.5.3",
     "webpack": "^4.16.5",
     "webpack-dev-server": "^3.1.5"

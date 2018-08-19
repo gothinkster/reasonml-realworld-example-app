@@ -1,7 +1,5 @@
 open Infix;
 
-let show = ReasonReact.string;
-
 type state = {
   image: string,
   name: string,
@@ -35,10 +33,10 @@ module Encode = {
   let token = currentUser => Json.Encode.[("token", string(currentUser))];
 };
 
-let updateSettings = (router, event, {ReasonReact.state}) => {
+let updateSettings = (event, {ReasonReact.state}) => {
   ReactEvent.Mouse.preventDefault(event);
   let responseCatch = (_status, payload) => {
-    DirectorRe.setRoute(router, "/profile");
+    ReasonReact.Router.push("/profile");
     payload
     |> Js.Promise.then_(result => {
          Js.log(result);
@@ -72,7 +70,7 @@ let getField =
 
 let component = ReasonReact.reducerComponent("Settings");
 
-let make = (~router, _children) => {
+let make = _children => {
   ...component,
   initialState: () => {image: "", name: "", bio: "", email: "", password: ""},
   reducer: (action, state) =>
@@ -110,7 +108,7 @@ let make = (~router, _children) => {
          });
     let displayResult = result => {
       if (result == "401") {
-        DirectorRe.setRoute(router, "/login");
+        ReasonReact.Router.push("/login");
       };
       let usersToken =
         JsonRequests.getUserGraph(result) |> JsonRequests.parseUser;
@@ -178,7 +176,7 @@ let make = (~router, _children) => {
                 </fieldset>
                 <button
                   className="btn btn-lg btn-primary pull-xs-right"
-                  onClick={self.handle(updateSettings(router))}>
+                  onClick={self.handle(updateSettings)}>
                   {show("Update Settings")}
                 </button>
               </fieldset>
